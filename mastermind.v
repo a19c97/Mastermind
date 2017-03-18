@@ -11,20 +11,36 @@ module mastermind_top(
     assign load = KEY[0];
     
     wire [11:0] code, guess;
+    wire load_code_1, load_code_2, load_code_3, load_code_4, 
+    load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     
     mastermind_control(
     	.clk(CLOCK_50),
     	.resetn(resetn),
-    	.load(load)	
+    	.load(load),	
+    	.data_in(SW[2:0])
+    	
+    	.load_code_1(load_code_1),
+    	.load_code_2(load_code_2),
+    	.load_code_3(load_code_3),
+    	.load_code_4(load_code_4),
+    	.load_guess_1(load_guess_1),
+    	.load_guess_2(load_guess_2),
+    	.load_guess_3(load_guess_3),
+    	.load_guess_4(load_guess_4)
     );
 endmodule
+
 
 module mastermind_control(
 	input clk,
 	input resetn,
 	input load,
+	input [2:0] data_in,
 	
-	output compare, load_code, load_guess;
+	output compare, 
+	output load_code_1, load_code_2, load_code_3, load_code_4,
+	output load_guess_1, load_guess_2, load_guess_3, load_guess_4;
 );
 	
 	reg [7:0] current_state, next_state;
@@ -74,11 +90,55 @@ module mastermind_control(
     always @(*)
     begin: enable_signals
     	// initialize everything to zero
+    	load_code_1 = 1'b0;
+    	load_code_2 = 1'b0;
+    	load_code_3 = 1'b0;
+    	load_code_4 = 1'b0;
+ 		load_guess_1 = 1'b0;
+ 		load_guess_2 = 1'b0;
+ 		load_guess_3 = 1'b0;
+ 		load_guess_4 = 1'b0;
+ 		compare = 1'b0;
     	case (current_state)
     		LOAD_CODE_1: begin
+    			load_code_1 = 1'b1;
     		end
+    		LOAD_CODE_2: begin
+    			load_code_2 = 1'b1;
+    		end
+    		LOAD_CODE_3: begin
+    			load_code_3 = 1'b1;
+    		end
+    		LOAD_CODE_4: begin
+    			load_code_4 = 1'b1;
+    		end
+    		LOAD_GUESS_1: begin
+    			load_guess_1 = 1'b1;
+    		end
+    		LOAD_GUESS_2: begin
+    			load_guess_2 = 1'b1;
+    		end
+    		LOAD_GUESS_3: begin
+    			load_guess_3 = 1'b1;
+    		end
+    		LOAD_GUESS_4: begin
+    			load_guess_4 = 1'b1;
+    		end
+    		
+    		
     	endcase
     end
 
+
+endmodule
+
+
+module mastermind_datapath(
+	input clk,
+	input resetn,
+	input [2:0] data_in,
+	input load_code_1, load_code_2, load_code_3, load_code_4,
+	input load_guess_1, load_guess_2, load_guess_3, load_guess_4;
+);
 endmodule
 
