@@ -63,23 +63,35 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
 
         else if (compareEn) begin
             // Red matches first
-            if ((!matched_1) && red_match_1) begin
-                matched_1 <= 1;
+            if (red_match_1) begin
+                if (matched_1)
+                    white <= white - 3'b001;
+                else
+                    matched_1 <= 1;
                 red <= red + 3'b001;
             end
             
-            else if ((!matched_2) && red_match_2) begin
-                matched_2 <= 1;
+            else if (red_match_2) begin
+                if (matched_2)
+                    white <= white - 3'b001;
+                else
+                    matched_2 <= 1;
                 red <= red + 3'b001;
             end
 
-            else if ((!matched_3) && red_match_3) begin
-                matched_3 <= 1;
+            else if (red_match_3) begin
+                if (matched_3)
+                    white <= white - 3'b001;
+                else
+                    matched_3 <= 1;
                 red <= red + 3'b001;
             end
 
-            else if ((!matched_4) && red_match_4) begin
-                matched_4 <= 1;
+            else if (red_match_4) begin
+                if (matched_4)
+                    white <= white - 3'b001;
+                else
+                    matched_4 <= 1;
                 red <= red + 3'b001;
             end
 
