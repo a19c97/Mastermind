@@ -52,54 +52,56 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     reg matched_4;
 
     always @(posedge clock) begin
-        if (!resetn)
+        if (!resetn) begin
             matched_1 <= 0;
             matched_2 <= 0;
             matched_3 <= 0;
             matched_4 <= 0;
             red <= 3'b000;
             white <= 3'b000;
+        end
+
         else if (compareEn) begin
             // Red matches first
             if ((!matched_1) && red_match_1) begin
                 matched_1 <= 1;
-                red <= red + 1'b001;
+                red <= red + 3'b001;
             end
             
             else if ((!matched_2) && red_match_2) begin
                 matched_2 <= 1;
-                red <= red + 1'b001;
+                red <= red + 3'b001;
             end
 
             else if ((!matched_3) && red_match_3) begin
                 matched_3 <= 1;
-                red <= red + 1'b001;
+                red <= red + 3'b001;
             end
 
             else if ((!matched_4) && red_match_4) begin
                 matched_4 <= 1;
-                red <= red + 1'b001;
+                red <= red + 3'b001;
             end
 
             // White matches next
             if ((!matched_1) && white_match_1) begin
                 matched_1 <= 1;
-                white <= white + 1'b001;
+                white <= white + 3'b001;
             end
 
             else if ((!matched_2) && white_match_2) begin
                 matched_2 <= 1;
-                white <= white + 1'b001;
+                white <= white + 3'b001;
             end
 
             else if ((!matched_3) && white_match_3) begin
                 matched_3 <= 1;
-                white <= white + 1'b001;
+                white <= white + 3'b001;
             end
 
             else if ((!matched_4) && white_match_4) begin
                 matched_4 <= 1;
-                white <= white + 1'b001;
+                white <= white + 3'b001;
             end
         end
     end
