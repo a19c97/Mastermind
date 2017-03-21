@@ -17,87 +17,91 @@ force {resetn} 0
 run 10ns
 
 
-force {resetn} 0
-force {load} 1
-
-run 20ns
+force {resetn} 1
 
 
-force {load} 0
-
-run 20ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
-
-
-run 60ns
+run 10ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
+
+
+
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
 
 
 force {load} 1
 
-run 20ns
+run 10ns
 
 
 force {load} 0
 
-run 20ns
+run 10ns
+
+
+force {load} 1
+
+run 10ns
+
+
+force {load} 0
+
+run 10ns
 
 run 60ns

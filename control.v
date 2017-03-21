@@ -1,4 +1,4 @@
-module mastermind_control(
+module control(
 	input clk,
 	input resetn,
 	input load,
