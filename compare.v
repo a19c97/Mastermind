@@ -34,16 +34,20 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     assign red_match_3 = ((compare_i == 2'b10) && (match_3)) ? 1'b1 : 1'b0;
     assign red_match_4 = ((compare_i == 2'b11) && (match_4)) ? 1'b1 : 1'b0;
 
+    wire any_red_match;
+
+    assign any_red_match = (red_match_1 || red_match_2) || (red_match_3 || red_match_4);
+
     // White matches
     wire white_match_1;
     wire white_match_2;
     wire white_match_3;
     wire white_match_4;
 
-    assign white_match_1 = ((!red_match_1) && match_1);
-    assign white_match_2 = ((!red_match_2) && match_2);
-    assign white_match_3 = ((!red_match_3) && match_3);
-    assign white_match_4 = ((!red_match_4) && match_4);
+    assign white_match_1 = ((!any_red_match) && match_1);
+    assign white_match_2 = ((!any_red_match) && match_2);
+    assign white_match_3 = ((!any_red_match) && match_3);
+    assign white_match_4 = ((!any_red_match) && match_4);
 
     // Reg that tracks which code registers are already matched up
     reg matched_1;
