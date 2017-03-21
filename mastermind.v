@@ -149,27 +149,29 @@ module mastermind_control(
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
         	RESULT_0: next_state = RESULT_1;
-		RESULT_1: next_state = RESULT_2;
-		RESULT_2: next_state = RESULT_3;
-		RESULT_3: next_state = GUESS_1;
+			RESULT_1: next_state = RESULT_2;
+			RESULT_2: next_state = RESULT_3;
+			RESULT_3: next_state = GUESS_1;
     	endcase
     end
     
     always @(*)
     begin: enable_signals
-    		// initialize everything to zero
-    		load_code_1 = 1'b0;
-    		load_code_2 = 1'b0;
-    		load_code_3 = 1'b0;
-    		load_code_4 = 1'b0;
+    	// initialize everything to zero
+    	load_code_1 = 1'b0;
+    	load_code_2 = 1'b0;
+    	load_code_3 = 1'b0;
+    	load_code_4 = 1'b0;
 
  		load_guess_1 = 1'b0;
  		load_guess_2 = 1'b0;
  		load_guess_3 = 1'b0;
  		load_guess_4 = 1'b0;
+ 		
  		compare = 1'b0;
 		compare_i = 2'd0;
 		reach_result_3 = 1'b0;
+		
     	case (current_state)
     		LOAD_CODE_1: begin
     			load_code_1 = 1'b1;
@@ -184,7 +186,6 @@ module mastermind_control(
     			load_code_4 = 1'b1;
     		end
     		GUESS_1: begin
-    			compare = 1'b0;
     			load_guess_1 = 1'b1;
     		end
     		GUESS_2: begin
@@ -198,20 +199,20 @@ module mastermind_control(
     		end
     		RESULT_0: begin
     			compare = 1'b1;
-			compare_i = 2'd0;
+				compare_i = 2'd0;
     		end
-		RESULT_1: begin
+			RESULT_1: begin
     			compare = 1'b1;
-			compare_i = 2'd1;
+				compare_i = 2'd1;
     		end
-		RESULT_2: begin
+			RESULT_2: begin
     			compare = 1'b1;
-			compare_i = 2'd2;
+				compare_i = 2'd2;
     		end
-		RESULT_3: begin
+			RESULT_3: begin
     			compare = 1'b1;
-			compare_i = 2'd3;
-			reach_result_3 = 1'b1;
+				compare_i = 2'd3;
+				reach_result_3 = 1'b1;
     		end
     	endcase
     end
@@ -256,36 +257,36 @@ module mastermind_datapath(
 			curr_code <= 3'd0;
         end
         else begin
-        	if (load_code_1) begin
-            		code[2:0] <= data_in;
-		end   
-		if (load_code_2) begin
-            		code[5:3] <= data_in;
-		end  
-		if (load_code_3) begin
-            		code[8:6] <= data_in;
-		end  
-		if (load_code_4) begin
-            		code[11:9] <= data_in;
-		end   
-		if (load_guess_1) begin
-			guess[2:0] <= data_in;
-		end
-		if (load_guess_2) begin
-			guess[5:3] <= data_in;
-		end
-		if (load_guess_3) begin
-			guess[8:6] <= data_in;
-		end
-		if (load_guess_4) begin
-			guess[11:9] <= data_in;
-		end
-		if (compare) begin
-			red_out <= red;
-			white_out <= white;
-		end
-            end
+		    if (load_code_1) begin
+		        code[2:0] <= data_in;
+			end   
+			if (load_code_2) begin
+		        code[5:3] <= data_in;
+			end  
+			if (load_code_3) begin
+		        code[8:6] <= data_in;
+			end  
+			if (load_code_4) begin
+		        code[11:9] <= data_in;
+			end   
+			if (load_guess_1) begin
+				guess[2:0] <= data_in;
+			end
+			if (load_guess_2) begin
+				guess[5:3] <= data_in;
+			end
+			if (load_guess_3) begin
+				guess[8:6] <= data_in;
+			end
+			if (load_guess_4) begin
+				guess[11:9] <= data_in;
+			end
+			if (compare) begin
+				red_out <= red;
+				white_out <= white;
+			end
         end
+    end
 	
 	// determine win or loss
 	always @(*) begin
@@ -338,7 +339,6 @@ module mastermind_datapath(
 		.red(red),
 		.white(white)
 	);
-	
 
 endmodule
 
@@ -379,16 +379,20 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     assign red_match_3 = ((compare_i == 2'b10) && (match_3)) ? 1'b1 : 1'b0;
     assign red_match_4 = ((compare_i == 2'b11) && (match_4)) ? 1'b1 : 1'b0;
 
+    wire any_red_match;
+
+    assign any_red_match = (red_match_1 || red_match_2) || (red_match_3 || red_match_4);
+
     // White matches
     wire white_match_1;
     wire white_match_2;
     wire white_match_3;
     wire white_match_4;
 
-    assign white_match_1 = ((!red_match_1) && match_1);
-    assign white_match_2 = ((!red_match_2) && match_2);
-    assign white_match_3 = ((!red_match_3) && match_3);
-    assign white_match_4 = ((!red_match_4) && match_4);
+    assign white_match_1 = ((!any_red_match) && match_1);
+    assign white_match_2 = ((!any_red_match) && match_2);
+    assign white_match_3 = ((!any_red_match) && match_3);
+    assign white_match_4 = ((!any_red_match) && match_4);
 
     // Reg that tracks which code registers are already matched up
     reg matched_1;
@@ -464,7 +468,6 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     end
     
 endmodule
-
 
 
 module hex_decoder(hex_digit, segments);
