@@ -184,6 +184,7 @@ module mastermind_control(
     			load_code_4 = 1'b1;
     		end
     		GUESS_1: begin
+    			compare = 1'b0;
     			load_guess_1 = 1'b1;
     		end
     		GUESS_2: begin
