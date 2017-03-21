@@ -22,11 +22,10 @@ module mastermind_top(
     mastermind_control ctrl(
     	.clk(CLOCK_50),
     	.resetn(resetn),
-    	.load(load),
-    	
+    	.load(load),	
     	.compare(compare),
-	.compare_i(compare_i),
-	.reach_result_3(reach_result_3),
+	    .compare_i(compare_i),
+	    .reach_result_3(reach_result_3),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -49,10 +48,9 @@ module mastermind_top(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	.compare_i(compare_i),
-	.compare(compare),
-	.reach_result_3(reach_result_3),
-    	
+	    .compare_i(compare_i),
+	    .compare(compare),
+	    .reach_result_3(reach_result_3),
     	.code(code),
     	.guess(guess),
     	.red_out(red),
@@ -108,27 +106,27 @@ module mastermind_control(
 	reg [7:0] current_state, next_state;
 	
 	localparam
-	LOAD_CODE_1 = 8'd0,
-	LOAD_CODE_1_WAIT = 8'd1,
-	LOAD_CODE_2 = 8'd2,
-	LOAD_CODE_2_WAIT = 8'd3,
-	LOAD_CODE_3 = 8'd4,
-	LOAD_CODE_3_WAIT = 8'd5,
-	LOAD_CODE_4 = 8'd6,
-	LOAD_CODE_4_WAIT = 8'd7,
-	GUESS_1 = 8'd8,
-	GUESS_1_WAIT = 8'd9,
-	GUESS_2 = 8'd10,
-	GUESS_2_WAIT = 8'd11,
-	GUESS_3 = 8'd12,
-	GUESS_3_WAIT = 8'd13,
-	GUESS_4 = 8'd14,
-	GUESS_4_WAIT = 8'd15,
-	RESULT_0 = 8'd16,
-	RESULT_1 = 8'd17,
-	RESULT_2 = 8'd18,
-	RESULT_3 = 8'd19;
-	
+        LOAD_CODE_1 = 8'd0,
+        LOAD_CODE_1_WAIT = 8'd1,
+        LOAD_CODE_2 = 8'd2,
+        LOAD_CODE_2_WAIT = 8'd3,
+        LOAD_CODE_3 = 8'd4,
+        LOAD_CODE_3_WAIT = 8'd5,
+        LOAD_CODE_4 = 8'd6,
+        LOAD_CODE_4_WAIT = 8'd7,
+        GUESS_1 = 8'd8,
+        GUESS_1_WAIT = 8'd9,
+        GUESS_2 = 8'd10,
+        GUESS_2_WAIT = 8'd11,
+        GUESS_3 = 8'd12,
+        GUESS_3_WAIT = 8'd13,
+        GUESS_4 = 8'd14,
+        GUESS_4_WAIT = 8'd15,
+        RESULT_0 = 8'd16,
+        RESULT_1 = 8'd17,
+        RESULT_2 = 8'd18,
+        RESULT_3 = 8'd19;
+        
 	always@(*)
     begin: state_table 
         case (current_state)
@@ -291,17 +289,17 @@ module mastermind_datapath(
 	// determine win or loss
 	always @(*) begin
 		if (guess_counter == 3) begin
-			if (red_out != 3) begin
+			if (red != 3'b100) begin
 				// Game over! 
-				red_out <= 3'd0;
-				white_out <= 3'd0;
+				red_out <= 3'b000;
+				white_out <= 3'b000;
 			end
 			
 		end
-		if (red == 4) begin
+		if (red == 3'b100) begin
 			// Win! 
-			red_out <= 3'd8;
-			white_out <= 3'd8;
+			// red_out <= 3'd8;
+			// white_out <= 3'd8;
 		end
 	end
 
