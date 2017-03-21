@@ -22,24 +22,24 @@ force {compareEn} 1
 
 force {guess[0]} 1
 force {guess[1]} 1
-force {guess[2]} 1
-force {guess[3]} 1
+force {guess[2]} 0
+force {guess[3]} 0
 force {guess[4]} 1
-force {guess[5]} 1
+force {guess[5]} 0
 force {guess[6]} 1
 force {guess[7]} 1
-force {guess[8]} 1
+force {guess[8]} 0
 force {guess[9]} 1
-force {guess[10]} 1
-force {guess[11]} 1
+force {guess[10]} 0
+force {guess[11]} 0
 
 
 force {compare_i[0]} 0
 force {compare_i[1]} 0
 
 force {curr_code[0]} 1
-force {curr_code[1]} 1
-force {curr_code[2]} 1
+force {curr_code[1]} 0
+force {curr_code[2]} 0
 
 run 10ns
 
@@ -49,7 +49,7 @@ force {compare_i[1]} 0
 
 force {curr_code[0]} 1
 force {curr_code[1]} 1
-force {curr_code[2]} 1
+force {curr_code[2]} 0
 
 run 10ns
 
@@ -57,9 +57,9 @@ run 10ns
 force {compare_i[0]} 0
 force {compare_i[1]} 1
 
-force {curr_code[0]} 1
+force {curr_code[0]} 0
 force {curr_code[1]} 1
-force {curr_code[2]} 1
+force {curr_code[2]} 0
 
 run 10ns
 
@@ -69,9 +69,9 @@ force {compare_i[1]} 1
 
 force {curr_code[0]} 1
 force {curr_code[1]} 1
-force {curr_code[2]} 1
+force {curr_code[2]} 0
 
-run 20ns
+run 10ns
 
 force {compareEn} 0
 
