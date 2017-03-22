@@ -1,4 +1,4 @@
-module mastermind_top(
+module mastermind(
 	SW, KEY, CLOCK_50, HEX6, HEX5, HEX3, HEX2, HEX1, HEX0
 );
     input [9:0] SW;
@@ -260,7 +260,6 @@ module mastermind_datapath(
         if (!resetn) begin
 			red_out <= 3'd0;
 			white_out <= 3'd0;
-			guess_counter <= 3'd0;
 			code <= 12'd0;
 			guess <= 12'd0;
 			curr_code <= 3'd0;
@@ -297,32 +296,22 @@ module mastermind_datapath(
 				white_out <= white;
 			end
         end
-    end
-	
-	// determine win or loss
-	always @(*) begin
-		if (guess_counter == 3) begin
-			if (red != 3'b100) begin
+		  
+		  // determine win or loss
+		  if (guess_counter == 3) begin
+				if (red != 3'b100) begin
 				// Game over! 
 				//red_out <= 3'b000;
 				//white_out <= 3'b000;
+				end
+			end
+			if (red == 3'b100) begin
+				// Win! 
+				red_out <= 3'd8;
+				white_out <= 3'd8;
 			end
 			
-		end
-		if (red == 3'b100) begin
-			// Win! 
-			red_out <= 3'd8;
-			white_out <= 3'd8;
-		end
-	end
-
-	// increment guess_counter
-	always @(posedge reach_result_4) begin
-		guess_counter <= guess_counter + 1;
-	end
-	
-	// assign curr_code
-	always @(*) begin
+		// assign curr code			
 		case (compare_i)
 			2'd0: begin
 				curr_code <= code[2:0];
@@ -337,7 +326,18 @@ module mastermind_datapath(
 				curr_code <= code[11:9];
 			end
 		endcase
+		
+    end
+	
+
+	// increment guess_counter
+	always @(posedge reach_result_4) begin
+		if (resetn) begin
+			guess_counter <= 3'd0;
+		end
+		guess_counter <= guess_counter + 1;
 	end
+	
 
 	compare c(
 		.clock(clk),
@@ -412,19 +412,10 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     reg matched_3;
     reg matched_4;
     
-    always @(*) begin
-    	if (resetRedWhite) begin
-		red <= 3'd0;
-		white <= 3'd0;
-		matched_1 <= 0;
-            	matched_2 <= 0;
-            	matched_3 <= 0;
-            	matched_4 <= 0;
-	end
-    end
 
     always @(posedge clock) begin
-        if (!resetn) begin
+	 
+        if (!resetn || resetRedWhite) begin
             matched_1 <= 0;
             matched_2 <= 0;
             matched_3 <= 0;
