@@ -127,15 +127,10 @@ module mastermind_control(
         GUESS_4 = 8'd14,
         GUESS_4_WAIT = 8'd15,
         RESULT_0 = 8'd16,
-        RESULT_0_again = 8'd17,
-        RESULT_1 = 8'd18,
-        RESULT_1_again = 8'd19,
-        RESULT_2 = 8'd20,
-		RESULT_2_again = 8'd21,
-		RESULT_3 = 8'd22,
-		RESULT_3_again = 8'd23,
-		RESULT_4 = 8'd24,
-		RESULT_4_again = 8'd25;
+        RESULT_1 = 8'd17,
+        RESULT_2 = 8'd18,
+        RESULT_3 = 8'd19,
+        RESULT_4 = 8'd20,
         
 	always@(*)
     begin: state_table 
@@ -157,9 +152,7 @@ module mastermind_control(
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
         	RESULT_0: next_state = RESULT_1;
-			//RESULT_0_again: next_state = RESULT_1;
 			RESULT_1: next_state = RESULT_2;
-			//RESULT_1_again: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = RESULT_4;
 			RESULT_4: next_state = GUESS_1;
