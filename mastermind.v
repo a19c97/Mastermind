@@ -150,6 +150,7 @@ module mastermind_control(
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = GUESS_1;
+        default: next_state = LOAD_CODE_1;
     	endcase
     end
     
