@@ -11,12 +11,12 @@ module mastermind_top(
     assign load = ~KEY[0];
     
     wire [11:0] code, guess;
-    wire [2:0] red, white;
+    wire [2:0] red_out, white_out;
     wire load_code_1, load_code_2, load_code_3, load_code_4, 
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     wire compare;
     wire [1:0] compare_i;
-    wire reach_result_4;
+    wire reach_result_4, resetRedWhite;
     wire [2:0] guess_counter;
     
     mastermind_control ctrl(
@@ -24,8 +24,9 @@ module mastermind_top(
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
-	    .compare_i(compare_i),
-	    .reach_result_4(reach_result_4),
+	.compare_i(compare_i),
+	.reach_result_4(reach_result_4),
+	.resetRedWhite(resetRedWhite),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -51,10 +52,11 @@ module mastermind_top(
 	    .compare_i(compare_i),
 	    .compare(compare),
 	    .reach_result_4(reach_result_4),
+	    .resetRedWhite(resetRedWhite),
     	.code(code),
     	.guess(guess),
-    	.red_out(red),
-    	.white_out(white),
+    	.red_out(red_out),
+    	.white_out(white_out),
 	.guess_counter(guess_counter)
     );
     
@@ -79,12 +81,12 @@ module mastermind_top(
     );
     
     hex_decoder H6(
-        .hex_digit({1'b0, red}), 
+        .hex_digit({1'b0, red_out}), 
         .segments(HEX6)
     );
     
     hex_decoder H5(
-        .hex_digit({1'b0, white}), 
+        .hex_digit({1'b0, white_out}), 
         .segments(HEX5)
     );
     
@@ -100,7 +102,7 @@ module mastermind_control(
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	output reg [1:0] compare_i,
-	output reg reach_result_4
+	output reg reach_result_4, resetRedWhite
 );
 	
 	reg [7:0] current_state, next_state;
@@ -172,6 +174,7 @@ module mastermind_control(
  		compare = 1'b0;
 		compare_i = 2'd0;
 		reach_result_4 = 1'b0;
+		resetRedWhite = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -188,6 +191,7 @@ module mastermind_control(
     		end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
+			resetRedWhite = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
@@ -240,7 +244,7 @@ module mastermind_datapath(
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	input [1:0] compare_i,
-	input compare, reach_result_4,
+	input compare, reach_result_4, resetRedWhite,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
@@ -276,6 +280,8 @@ module mastermind_datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
+				red_out <= 3'd0;
+				white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -342,14 +348,15 @@ module mastermind_datapath(
 		.guess(guess),
 		
 		.red(red),
-		.white(white)
+		.white(white),
+		.resetRedWhite(resetRedWhite)
 	);
 
 endmodule
 
 
 module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white);
-    input resetn, clock, compareEn;
+    input resetn, clock, compareEn, resetRedWhite;
     input [1:0] compare_i; // Two bit signal that indicates current code index
     input [2:0] curr_code;
     input [11:0] guess;
@@ -404,6 +411,13 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     reg matched_2;
     reg matched_3;
     reg matched_4;
+    
+    always @(*) begin
+    	if (resetRedWhite) begin
+		red <= 3'd0;
+		white <= 3'd0;
+	end
+    end
 
     always @(posedge clock) begin
         if (!resetn) begin
