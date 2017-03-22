@@ -49,10 +49,10 @@ module mastermind_top(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	    .compare_i(compare_i),
-	    .compare(compare),
-	    .reach_result_4(reach_result_4),
-	    .resetRedWhite(resetRedWhite),
+	.compare_i(compare_i),
+	.compare(compare),
+	.reach_result_4(reach_result_4),
+	.resetRedWhite(resetRedWhite),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
@@ -150,10 +150,10 @@ module mastermind_control(
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
         	RESULT_0: next_state = RESULT_1;
-			RESULT_1: next_state = RESULT_2;
-			RESULT_2: next_state = RESULT_3;
-			RESULT_3: next_state = RESULT_4;
-			RESULT_4: next_state = GUESS_1;
+		RESULT_1: next_state = RESULT_2;
+		RESULT_2: next_state = RESULT_3;
+		RESULT_3: next_state = RESULT_4;
+		RESULT_4: next_state = GUESS_1;
         default: next_state = LOAD_CODE_1;
     	endcase
     end
@@ -166,15 +166,15 @@ module mastermind_control(
     	load_code_3 = 1'b0;
     	load_code_4 = 1'b0;
 
- 		load_guess_1 = 1'b0;
- 		load_guess_2 = 1'b0;
- 		load_guess_3 = 1'b0;
- 		load_guess_4 = 1'b0;
+ 	load_guess_1 = 1'b0;
+ 	load_guess_2 = 1'b0;
+	load_guess_3 = 1'b0;
+ 	load_guess_4 = 1'b0;
  		
- 		compare = 1'b0;
-		compare_i = 2'd0;
-		reach_result_4 = 1'b0;
-		resetRedWhite = 1'b0;
+ 	compare = 1'b0;
+	compare_i = 2'd0;
+	reach_result_4 = 1'b0;
+	resetRedWhite = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -204,24 +204,24 @@ module mastermind_control(
     		end
     		RESULT_0: begin
     			compare = 1'b1;
-				compare_i = 2'd0;
+			compare_i = 2'd0;
     		end
-			RESULT_1: begin
+		RESULT_1: begin
     			compare = 1'b1;
-				compare_i = 2'd1;
+			compare_i = 2'd1;
     		end
-			RESULT_2: begin
+		RESULT_2: begin
     			compare = 1'b1;
-				compare_i = 2'd2;
+			compare_i = 2'd2;
     		end
     		RESULT_3: begin
     			compare = 1'b1;
-				compare_i = 2'd3;
+			compare_i = 2'd3;
     		end
-			RESULT_4: begin
+		RESULT_4: begin
     			compare = 1'b0;
-				compare_i = 2'd0;
-				reach_result_4 = 1'b1;
+			compare_i = 2'd0;
+			reach_result_4 = 1'b1;
     		end
     	endcase
     end
@@ -280,8 +280,8 @@ module mastermind_datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
-				//red_out <= 3'd0;
-				//white_out <= 3'd0;
+				red_out <= 3'd0;
+				white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -292,10 +292,10 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			//if (reach_result_4) begin
+			if (reach_result_4) begin
 				red_out <= red;
 				white_out <= white;
-			//end
+			end
         end
     end
 	
@@ -304,8 +304,8 @@ module mastermind_datapath(
 		if (guess_counter == 3) begin
 			if (red != 3'b100) begin
 				// Game over! 
-				red_out <= 3'b000;
-				white_out <= 3'b000;
+				//red_out <= 3'b000;
+				//white_out <= 3'b000;
 			end
 			
 		end
@@ -416,6 +416,10 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     	if (resetRedWhite) begin
 		red <= 3'd0;
 		white <= 3'd0;
+		matched_1 <= 0;
+            	matched_2 <= 0;
+            	matched_3 <= 0;
+            	matched_4 <= 0;
 	end
     end
 
