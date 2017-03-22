@@ -204,24 +204,24 @@ module mastermind_control(
     		end
     		RESULT_0: begin
     			compare = 1'b1;
-			compare_i = 2'd0;
+		    	compare_i = 2'd0;
     		end
 		RESULT_1: begin
     			compare = 1'b1;
-			compare_i = 2'd1;
+		    	compare_i = 2'd1;
     		end
 		RESULT_2: begin
     			compare = 1'b1;
-			compare_i = 2'd2;
+		    	compare_i = 2'd2;
     		end
     		RESULT_3: begin
     			compare = 1'b1;
-			compare_i = 2'd3;
+		    	compare_i = 2'd3;
     		end
 		RESULT_4: begin
     			compare = 1'b0;
-			compare_i = 2'd0;
-			reach_result_4 = 1'b1;
+		    	compare_i = 2'd0;
+		    	reach_result_4 = 1'b1;
     		end
     	endcase
     end
@@ -297,19 +297,19 @@ module mastermind_datapath(
 			end
         end
 		  
-		  // determine win or loss
-		  if (guess_counter == 3) begin
-				if (red != 3'b100) begin
-				// Game over! 
-				//red_out <= 3'b000;
-				//white_out <= 3'b000;
-				end
+		// determine win or loss
+		if (guess_counter == 3) begin
+			if (red != 3'b100) begin
+			// Game over! 
+			//red_out <= 3'b000;
+			//white_out <= 3'b000;
 			end
-			if (red == 3'b100) begin
-				// Win! 
-				red_out <= 3'd8;
-				white_out <= 3'd8;
-			end
+		end
+		if (red == 3'b100) begin
+			// Win! 
+			red_out <= 3'd8;
+			white_out <= 3'd8;
+		end
 			
 		// assign curr code			
 		case (compare_i)
@@ -329,7 +329,6 @@ module mastermind_datapath(
 		
     end
 	
-
 	// increment guess_counter
 	always @(posedge reach_result_4) begin
 		if (resetn) begin
