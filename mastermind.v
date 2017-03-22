@@ -280,8 +280,8 @@ module mastermind_datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
-				red_out <= 3'd0;
-				white_out <= 3'd0;
+				//red_out <= 3'd0;
+				//white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -292,10 +292,10 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			if (reach_result_4) begin
+			//if (reach_result_4) begin
 				red_out <= red;
 				white_out <= white;
-			end
+			//end
         end
     end
 	
@@ -311,8 +311,8 @@ module mastermind_datapath(
 		end
 		if (red == 3'b100) begin
 			// Win! 
-			// red_out <= 3'd8;
-			// white_out <= 3'd8;
+			red_out <= 3'd8;
+			white_out <= 3'd8;
 		end
 	end
 
@@ -355,7 +355,7 @@ module mastermind_datapath(
 endmodule
 
 
-module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white);
+module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white, resetRedWhite);
     input resetn, clock, compareEn, resetRedWhite;
     input [1:0] compare_i; // Two bit signal that indicates current code index
     input [2:0] curr_code;
