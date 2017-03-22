@@ -13,10 +13,10 @@ module mastermind_top(
     wire [11:0] code, guess;
     wire [2:0] red, white;
     wire load_code_1, load_code_2, load_code_3, load_code_4, 
-    load_guess_1, load_guess_2, load_guess_3, load_guess_4;
+         load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     wire compare;
     wire [1:0] compare_i;
-    wire reach_result_3;
+    wire reach_result_4;
     wire [2:0] guess_counter;
     
     mastermind_control ctrl(
@@ -25,7 +25,7 @@ module mastermind_top(
     	.load(load),	
     	.compare(compare),
 	    .compare_i(compare_i),
-	    .reach_result_3(reach_result_3),
+	    .reach_result_4(reach_result_4),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -50,7 +50,7 @@ module mastermind_top(
     	.load_guess_4(load_guess_4),
 	    .compare_i(compare_i),
 	    .compare(compare),
-	    .reach_result_3(reach_result_3),
+	    .reach_result_4(reach_result_4),
     	.code(code),
     	.guess(guess),
     	.red_out(red),
@@ -310,7 +310,7 @@ module mastermind_datapath(
 	end
 
 	// increment guess_counter
-	always @(posedge reach_result_3) begin
+	always @(posedge reach_result_4) begin
 		guess_counter <= guess_counter + 1;
 	end
 	
