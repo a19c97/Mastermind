@@ -32,7 +32,8 @@ module control(
         RESULT_0 = 8'd16,
         RESULT_1 = 8'd17,
         RESULT_2 = 8'd18,
-        RESULT_3 = 8'd19;
+        RESULT_3 = 8'd19,
+        RESULT_4 = 8'd20;
         
 	always@(*)
     begin: state_table 
