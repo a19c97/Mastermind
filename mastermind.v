@@ -18,15 +18,16 @@ module mastermind(
     wire [1:0] compare_i;
     wire reach_result_4, resetRedWhite;
     wire [2:0] guess_counter;
+	wire [2:0] curr_code;
     
     mastermind_control ctrl(
     	.clk(CLOCK_50),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
-	.compare_i(compare_i),
-	.reach_result_4(reach_result_4),
-	.resetRedWhite(resetRedWhite),
+		.compare_i(compare_i),
+		.reach_result_4(reach_result_4),
+		.resetRedWhite(resetRedWhite),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -49,15 +50,16 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	.compare_i(compare_i),
-	.compare(compare),
-	.reach_result_4(reach_result_4),
-	.resetRedWhite(resetRedWhite),
+		.compare_i(compare_i),
+		.compare(compare),
+		.reach_result_4(reach_result_4),
+		.resetRedWhite(resetRedWhite),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-	.guess_counter(guess_counter)
+		.guess_counter(guess_counter),
+		.curr_code(curr_code)
     );
     
     hex_decoder H0(
@@ -125,10 +127,15 @@ module mastermind_control(
         GUESS_4 = 8'd14,
         GUESS_4_WAIT = 8'd15,
         RESULT_0 = 8'd16,
-        RESULT_1 = 8'd17,
-        RESULT_2 = 8'd18,
-        RESULT_3 = 8'd19,
-        RESULT_4 = 8'd20;
+        RESULT_0_again = 8'd17,
+        RESULT_1 = 8'd18,
+        RESULT_1_again = 8'd19,
+        RESULT_2 = 8'd20,
+		RESULT_2_again = 8'd21,
+		RESULT_3 = 8'd22,
+		RESULT_3_again = 8'd23,
+		RESULT_4 = 8'd24,
+		RESULT_4_again = 8'd25;
         
 	always@(*)
     begin: state_table 
@@ -150,11 +157,13 @@ module mastermind_control(
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
         	RESULT_0: next_state = RESULT_1;
-		RESULT_1: next_state = RESULT_2;
-		RESULT_2: next_state = RESULT_3;
-		RESULT_3: next_state = RESULT_4;
-		RESULT_4: next_state = GUESS_1;
-        default: next_state = LOAD_CODE_1;
+			//RESULT_0_again: next_state = RESULT_1;
+			RESULT_1: next_state = RESULT_2;
+			//RESULT_1_again: next_state = RESULT_2;
+			RESULT_2: next_state = RESULT_3;
+			RESULT_3: next_state = RESULT_4;
+			RESULT_4: next_state = GUESS_1;
+			default: next_state = LOAD_CODE_1;
     	endcase
     end
     
@@ -191,7 +200,7 @@ module mastermind_control(
     		end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
-			resetRedWhite = 1'b1;
+				resetRedWhite = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
@@ -201,27 +210,28 @@ module mastermind_control(
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
+				compare_i = 2'd0;
     		end
     		RESULT_0: begin
-    			compare = 1'b1;
-		    	compare_i = 2'd0;
+				compare = 1'b1;
+				compare_i = 2'd0;
     		end
-		RESULT_1: begin
-    			compare = 1'b1;
-		    	compare_i = 2'd1;
+			RESULT_1: begin
+				compare = 1'b1;
+				compare_i = 2'd1;
     		end
-		RESULT_2: begin
+			RESULT_2: begin
     			compare = 1'b1;
-		    	compare_i = 2'd2;
+				compare_i = 2'd2;
     		end
     		RESULT_3: begin
-    			compare = 1'b1;
-		    	compare_i = 2'd3;
+				compare = 1'b1;
+				compare_i = 2'd3;
     		end
-		RESULT_4: begin
-    			compare = 1'b0;
-		    	compare_i = 2'd0;
-		    	reach_result_4 = 1'b1;
+			RESULT_4: begin
+				compare = 1'b0;
+				compare_i = 2'd3;
+				reach_result_4 = 1'b1;
     		end
     	endcase
     end
@@ -248,12 +258,13 @@ module mastermind_datapath(
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
-	output reg [2:0] guess_counter
+	output reg [2:0] guess_counter,
+	output reg [2:0] curr_code
 );
 	
 	wire [2:0] red, white; // number of red and white pegs in feedback
 	//reg [2:0] guess_counter; // counter to count up to 8 guesses
-	reg [2:0] curr_code;
+	//reg [2:0] curr_code;
 	
 	// loading inputs
 	always @ (posedge clk) begin
@@ -262,7 +273,6 @@ module mastermind_datapath(
 			white_out <= 3'd0;
 			code <= 12'd0;
 			guess <= 12'd0;
-			curr_code <= 3'd0;
         end
         else begin
 		    if (load_code_1) begin
@@ -279,8 +289,8 @@ module mastermind_datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
-				red_out <= 3'd0;
-				white_out <= 3'd0;
+				//red_out <= 3'd0;
+				//white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -291,26 +301,31 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			if (reach_result_4) begin
+			//if (reach_result_4) begin
 				red_out <= red;
 				white_out <= white;
-			end
+			//end
         end
 		  
-		// determine win or loss
-		if (guess_counter == 3) begin
-			if (red != 3'b100) begin
-			// Game over! 
-			//red_out <= 3'b000;
-			//white_out <= 3'b000;
+		  // determine win or loss
+		  if (guess_counter == 3) begin
+				if (red != 3'b100) begin
+				// Game over! 
+				//red_out <= 3'b000;
+				//white_out <= 3'b000;
+				end
 			end
+			if (red == 3'b100) begin
+				// Win! 
+				red_out <= 3'd8;
+				white_out <= 3'd8;
+			end
+    end
+	
+	always @(*) begin
+		if (resetn) begin
+			curr_code <= 3'd0;
 		end
-		if (red == 3'b100) begin
-			// Win! 
-			red_out <= 3'd8;
-			white_out <= 3'd8;
-		end
-			
 		// assign curr code			
 		case (compare_i)
 			2'd0: begin
@@ -326,9 +341,8 @@ module mastermind_datapath(
 				curr_code <= code[11:9];
 			end
 		endcase
-		
-    end
-	
+	end
+
 	// increment guess_counter
 	always @(posedge reach_result_4) begin
 		if (resetn) begin
