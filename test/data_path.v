@@ -5,7 +5,7 @@ module datapath(
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	input [1:0] compare_i,
-	input compare, reach_result_3,
+	input compare, reach_result_4, resetRedWhite,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
@@ -21,7 +21,6 @@ module datapath(
         if (!resetn) begin
 			red_out <= 3'd0;
 			white_out <= 3'd0;
-			guess_counter <= 3'd0;
 			code <= 12'd0;
 			guess <= 12'd0;
 			curr_code <= 3'd0;
@@ -41,6 +40,8 @@ module datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
+				red_out <= 3'd0;
+				white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -51,37 +52,27 @@ module datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			if (compare) begin
+			if (reach_result_4) begin
 				red_out <= red;
 				white_out <= white;
 			end
         end
-    end
-	
-	// determine win or loss
-	always @(*) begin
-		if (guess_counter == 3) begin
-			if (red != 3'b100) begin
+		  
+		  // determine win or loss
+		  if (guess_counter == 3) begin
+				if (red != 3'b100) begin
 				// Game over! 
-				red_out <= 3'b000;
-				white_out <= 3'b000;
+				//red_out <= 3'b000;
+				//white_out <= 3'b000;
+				end
+			end
+			if (red == 3'b100) begin
+				// Win! 
+				red_out <= 3'd8;
+				white_out <= 3'd8;
 			end
 			
-		end
-		if (red == 3'b100) begin
-			// Win! 
-			// red_out <= 3'd8;
-			// white_out <= 3'd8;
-		end
-	end
-
-	// increment guess_counter
-	always @(posedge reach_result_3) begin
-		guess_counter <= guess_counter + 1;
-	end
-	
-	// assign curr_code
-	always @(*) begin
+		// assign curr code			
 		case (compare_i)
 			2'd0: begin
 				curr_code <= code[2:0];
@@ -96,7 +87,18 @@ module datapath(
 				curr_code <= code[11:9];
 			end
 		endcase
+		
+    end
+	
+
+	// increment guess_counter
+	always @(posedge reach_result_4) begin
+		if (resetn) begin
+			guess_counter <= 3'd0;
+		end
+		guess_counter <= guess_counter + 1;
 	end
+	
 
 	compare c(
 		.clock(clk),
@@ -105,15 +107,17 @@ module datapath(
 		.compare_i(compare_i),
 		.curr_code(curr_code),
 		.guess(guess),
+		
 		.red(red),
-		.white(white)
+		.white(white),
+		.resetRedWhite(resetRedWhite)
 	);
 
 endmodule
 
 
-module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white);
-    input resetn, clock, compareEn;
+module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white, resetRedWhite);
+    input resetn, clock, compareEn, resetRedWhite;
     input [1:0] compare_i; // Two bit signal that indicates current code index
     input [2:0] curr_code;
     input [11:0] guess;
@@ -168,9 +172,11 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     reg matched_2;
     reg matched_3;
     reg matched_4;
+    
 
     always @(posedge clock) begin
-        if (!resetn) begin
+	 
+        if (!resetn || resetRedWhite) begin
             matched_1 <= 0;
             matched_2 <= 0;
             matched_3 <= 0;

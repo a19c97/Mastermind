@@ -1,5 +1,5 @@
-module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white);
-    input resetn, clock, compareEn;
+module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white, resetRedWhite);
+    input resetn, clock, compareEn, resetRedWhite;
     input [1:0] compare_i; // Two bit signal that indicates current code index
     input [2:0] curr_code;
     input [11:0] guess;
@@ -54,9 +54,11 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     reg matched_2;
     reg matched_3;
     reg matched_4;
+    
 
     always @(posedge clock) begin
-        if (!resetn) begin
+	 
+        if (!resetn || resetRedWhite) begin
             matched_1 <= 0;
             matched_2 <= 0;
             matched_3 <= 0;
@@ -123,4 +125,3 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
     end
     
 endmodule
-
