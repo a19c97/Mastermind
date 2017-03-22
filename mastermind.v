@@ -100,7 +100,7 @@ module mastermind_control(
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	output reg [1:0] compare_i,
-	output reg reach_result_3
+	output reg reach_result_4
 );
 	
 	reg [7:0] current_state, next_state;
@@ -149,7 +149,8 @@ module mastermind_control(
         	RESULT_0: next_state = RESULT_1;
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
-			RESULT_3: next_state = GUESS_1;
+			RESULT_3: next_state = RESULT_4;
+			RESULT_4: next_state = GUESS_1;
         default: next_state = LOAD_CODE_1;
     	endcase
     end
@@ -169,7 +170,7 @@ module mastermind_control(
  		
  		compare = 1'b0;
 		compare_i = 2'd0;
-		reach_result_3 = 1'b0;
+		reach_result_4 = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -208,10 +209,14 @@ module mastermind_control(
     			compare = 1'b1;
 				compare_i = 2'd2;
     		end
-			RESULT_3: begin
+    		RESULT_3: begin
     			compare = 1'b1;
 				compare_i = 2'd3;
-				reach_result_3 = 1'b1;
+    		end
+			RESULT_4: begin
+    			compare = 1'b0;
+				compare_i = 2'd0;
+				reach_result_4 = 1'b1;
     		end
     	endcase
     end
@@ -234,7 +239,7 @@ module mastermind_datapath(
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	input [1:0] compare_i,
-	input compare, reach_result_3,
+	input compare, reach_result_4,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
@@ -280,7 +285,7 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			if (compare) begin
+			if (reach_result_4) begin
 				red_out <= red;
 				white_out <= white;
 			end
