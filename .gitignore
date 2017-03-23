@@ -5,3 +5,4 @@ transcript
 vsim.wlf
 work/
 **/wlft*
+.DS_Store
