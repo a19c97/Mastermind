@@ -201,7 +201,7 @@ module mastermind_control(
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
-				resetRedWhite = 1'b1;
+				//resetRedWhite = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
@@ -232,7 +232,7 @@ module mastermind_control(
     		end
 			RESULT_4: begin
 				compare = 1'b0;
-				compare_i = 2'd3;
+				compare_i = 2'd0;
 				reach_result_4 = 1'b1;
     		end
     	endcase
@@ -271,8 +271,6 @@ module mastermind_datapath(
 	// loading inputs
 	always @ (posedge clk) begin
         if (!resetn) begin
-			red_out <= 3'd0;
-			white_out <= 3'd0;
 			code <= 12'd0;
 			guess <= 12'd0;
         end
@@ -304,8 +302,6 @@ module mastermind_datapath(
 				guess[11:9] <= data_in;
 			end
 			//if (reach_result_4) begin
-				red_out <= red;
-				white_out <= white;
 			//end
         end
 		  
@@ -323,6 +319,15 @@ module mastermind_datapath(
 				white_out <= 3'd8;
 			end
     end
+	
+	always @(*) begin
+		if (!resetn) begin
+			red_out <= 3'd0;
+			white_out <= 3'd0;
+		end
+		red_out <= red;
+		white_out <= white;
+	end
 	
 	always @(*) begin
 		if (resetn) begin
