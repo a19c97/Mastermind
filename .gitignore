@@ -5,4 +5,8 @@ transcript
 vsim.wlf
 work/
 **/wlft*
+<<<<<<< HEAD
 .DS_Store
+=======
+**/.nfs*
+>>>>>>> 1c60f8aa3a9621870b3adb030db3b47e8b15447a
