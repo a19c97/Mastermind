@@ -1,10 +1,10 @@
 module mastermind(
-	SW, KEY, CLOCK_50, HEX6, HEX5, HEX3, HEX2, HEX1, HEX0
+	SW, KEY, CLOCK_50, HEX5, HEX4, HEX3, HEX2, HEX1, HEX0
 );
     input [9:0] SW;
     input [3:0] KEY;
     input CLOCK_50;
-    output [6:0] HEX6, HEX5, HEX3, HEX2, HEX1, HEX0;
+    output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
     
     wire load, resetn;
     assign resetn = KEY[1];
@@ -17,7 +17,7 @@ module mastermind(
     wire compare;
     wire [1:0] compare_i;
     wire reach_result_4, resetRedWhite;
-    wire [2:0] guess_counter;
+    //wire [2:0] guess_counter;
 	wire [2:0] curr_code;
     
     mastermind_control ctrl(
@@ -58,7 +58,7 @@ module mastermind(
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-		.guess_counter(guess_counter),
+		//.guess_counter(guess_counter),
 		.curr_code(curr_code)
     );
     
@@ -82,9 +82,9 @@ module mastermind(
         .segments(HEX3)
     );
     
-    hex_decoder H6(
+    hex_decoder H4(
         .hex_digit({1'b0, red_out}), 
-        .segments(HEX6)
+        .segments(HEX4)
     );
     
     hex_decoder H5(
@@ -127,10 +127,15 @@ module mastermind_control(
         GUESS_4 = 8'd14,
         GUESS_4_WAIT = 8'd15,
         RESULT_0 = 8'd16,
-        RESULT_1 = 8'd17,
-        RESULT_2 = 8'd18,
-        RESULT_3 = 8'd19,
-        RESULT_4 = 8'd20,
+        RESULT_0_again = 8'd17,
+        RESULT_1 = 8'd18,
+        RESULT_1_again = 8'd19,
+        RESULT_2 = 8'd20,
+		  RESULT_2_again = 8'd21,
+		  RESULT_3 = 8'd22,
+		  RESULT_3_again = 8'd23,
+		  RESULT_4 = 8'd24,
+		  RESULT_4_again = 8'd25;
         
 	always@(*)
     begin: state_table 
@@ -151,7 +156,7 @@ module mastermind_control(
         	GUESS_3_WAIT: next_state = load ? GUESS_3_WAIT : GUESS_4;
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
-        	RESULT_0: next_state = RESULT_1;
+			RESULT_0: next_state = RESULT_1;
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = RESULT_4;
@@ -168,15 +173,15 @@ module mastermind_control(
     	load_code_3 = 1'b0;
     	load_code_4 = 1'b0;
 
- 	load_guess_1 = 1'b0;
- 	load_guess_2 = 1'b0;
-	load_guess_3 = 1'b0;
- 	load_guess_4 = 1'b0;
+		load_guess_1 = 1'b0;
+		load_guess_2 = 1'b0;
+		load_guess_3 = 1'b0;
+		load_guess_4 = 1'b0;
  		
- 	compare = 1'b0;
-	compare_i = 2'd0;
-	reach_result_4 = 1'b0;
-	resetRedWhite = 1'b0;
+		compare = 1'b0;
+		compare_i = 2'd0;
+		reach_result_4 = 1'b0;
+		resetRedWhite = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -193,10 +198,10 @@ module mastermind_control(
     		end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
-				resetRedWhite = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
+				resetRedWhite = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
@@ -206,6 +211,10 @@ module mastermind_control(
 				compare_i = 2'd0;
     		end
     		RESULT_0: begin
+				compare = 1'b1;
+				compare_i = 2'd0;
+    		end
+			RESULT_0_again: begin
 				compare = 1'b1;
 				compare_i = 2'd0;
     		end
@@ -251,7 +260,7 @@ module mastermind_datapath(
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
-	output reg [2:0] guess_counter,
+	//output reg [2:0] guess_counter,
 	output reg [2:0] curr_code
 );
 	
@@ -301,13 +310,13 @@ module mastermind_datapath(
         end
 		  
 		  // determine win or loss
-		  if (guess_counter == 3) begin
-				if (red != 3'b100) begin
+		  //if (guess_counter == 3) begin
+				//if (red != 3'b100) begin
 				// Game over! 
 				//red_out <= 3'b000;
 				//white_out <= 3'b000;
-				end
-			end
+				//end
+			//end
 			if (red == 3'b100) begin
 				// Win! 
 				red_out <= 3'd8;
@@ -337,12 +346,12 @@ module mastermind_datapath(
 	end
 
 	// increment guess_counter
-	always @(posedge reach_result_4) begin
-		if (resetn) begin
-			guess_counter <= 3'd0;
-		end
-		guess_counter <= guess_counter + 1;
-	end
+	//always @(posedge reach_result_4) begin
+	//	if (resetn) begin
+	//		guess_counter <= 3'd0;
+	//	end
+	//	guess_counter <= guess_counter + 1;
+	//end
 	
 
 	compare c(
