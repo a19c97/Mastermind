@@ -1,5 +1,5 @@
 vlib work
-vlog -timescale 1ns/1ns mastermind_alt.v
+vlog -timescale 1ns/1ns mastermind.v
 vsim mastermind
 log {/*}
 add wave {/*}

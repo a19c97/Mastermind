@@ -16,7 +16,7 @@ module mastermind(
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     wire compare;
     wire [1:0] compare_i;
-    wire reach_result_4, resetRedWhite;
+    wire reach_result_4, reset_red_white;
     //wire [2:0] guess_counter;
 	wire [2:0] curr_code;
     
@@ -27,7 +27,7 @@ module mastermind(
     	.compare(compare),
 		.compare_i(compare_i),
 		.reach_result_4(reach_result_4),
-		.resetRedWhite(resetRedWhite),
+		.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -53,7 +53,7 @@ module mastermind(
 		.compare_i(compare_i),
 		.compare(compare),
 		.reach_result_4(reach_result_4),
-		.resetRedWhite(resetRedWhite),
+		.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
@@ -104,7 +104,7 @@ module mastermind_control(
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	output reg [1:0] compare_i,
-	output reg reach_result_4, resetRedWhite
+	output reg reach_result_4, reset_red_white
 );
 	
 	reg [7:0] current_state, next_state;
@@ -181,7 +181,7 @@ module mastermind_control(
 		compare = 1'b0;
 		compare_i = 2'd0;
 		reach_result_4 = 1'b0;
-		resetRedWhite = 1'b0;
+		reset_red_white = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -201,7 +201,7 @@ module mastermind_control(
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
-				resetRedWhite = 1'b1;
+				reset_red_white = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
@@ -256,7 +256,7 @@ module mastermind_datapath(
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	input [1:0] compare_i,
-	input compare, reach_result_4, resetRedWhite,
+	input compare, reach_result_4, reset_red_white,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
@@ -373,14 +373,14 @@ module mastermind_datapath(
 		
 		.red(red),
 		.white(white),
-		.resetRedWhite(resetRedWhite)
+		.reset_red_white(reset_red_white)
 	);
 
 endmodule
 
 
-module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white, resetRedWhite);
-    input resetn, clock, compareEn, resetRedWhite;
+module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white, reset_red_white);
+    input resetn, clock, compareEn, reset_red_white;
     input [1:0] compare_i; // Two bit signal that indicates current code index
     input [2:0] curr_code;
     input [11:0] guess;
@@ -439,7 +439,7 @@ module compare(clock, resetn, compareEn, compare_i, curr_code, guess, red, white
 
     always @(posedge clock) begin
 	 
-        if (!resetn || resetRedWhite) begin
+        if (!resetn || reset_red_white) begin
             matched_1 <= 0;
             matched_2 <= 0;
             matched_3 <= 0;
