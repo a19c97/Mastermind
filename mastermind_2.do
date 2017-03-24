@@ -14,6 +14,7 @@ force {SW[0]} 0
 run 10ns
 
 
+# Load code
 
 force {KEY[1]} 1
 force {SW[2]} 0
@@ -24,7 +25,7 @@ run 10ns
 force {KEY[0]} 0
 run 10ns
 
-force {KEY[1]} 1
+force {KEY[0]} 1
 run 10ns
 
 
@@ -37,7 +38,7 @@ run 10ns
 force {KEY[0]} 0
 run 10ns
 
-force {KEY[1]} 1
+force {KEY[0]} 1
 run 10ns
 
 
@@ -50,7 +51,7 @@ run 10ns
 force {KEY[0]} 0
 run 10ns
 
-force {KEY[1]} 1
+force {KEY[0]} 1
 run 10ns
 
 
@@ -63,5 +64,60 @@ run 10ns
 force {KEY[0]} 0
 run 10ns
 
-force {KEY[1]} 1
+force {KEY[0]} 1
 run 10ns
+
+
+# Load guess 1
+
+force {SW[2]} 0
+force {SW[1]} 1
+force {SW[0]} 1
+run 10ns
+
+force {KEY[0]} 0
+run 10ns
+
+force {KEY[0]} 1
+run 10ns
+
+
+
+force {SW[2]} 0
+force {SW[1]} 1
+force {SW[0]} 0
+run 10ns
+
+force {KEY[0]} 0
+run 10ns
+
+force {KEY[0]} 1
+run 10ns
+
+
+
+force {SW[2]} 0
+force {SW[1]} 1
+force {SW[0]} 1
+run 10ns
+
+force {KEY[0]} 0
+run 10ns
+
+force {KEY[0]} 1
+run 10ns
+
+
+
+force {SW[2]} 1
+force {SW[1]} 1
+force {SW[0]} 1
+run 10ns
+
+force {KEY[0]} 0
+run 10ns
+
+force {KEY[0]} 1
+run 10ns
+
+run 50ns
