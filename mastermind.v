@@ -317,7 +317,7 @@ module mastermind_datapath(
 			// Win! 
 		//	red_out <= 3'd8;
 		//	white_out <= 3'd8;
-		end
+		//end
     end
 	
 	always @(*) begin
