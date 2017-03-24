@@ -16,9 +16,9 @@ module mastermind(
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     wire compare;
     wire [1:0] compare_i;
-    wire reach_result_4, reset_red_white;
-    //wire [2:0] guess_counter;
-	wire [2:0] curr_code;
+    wire reach_result_4, reset_red_white, erase_code;
+    wire [2:0] guess_counter;
+    wire [2:0] curr_code;
     
     mastermind_control ctrl(
     	.clk(CLOCK_50),
@@ -35,7 +35,8 @@ module mastermind(
     	.load_guess_1(load_guess_1),
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
-    	.load_guess_4(load_guess_4)
+    	.load_guess_4(load_guess_4),
+	.erase_code(erase_code)
     );
     
     mastermind_datapath data(
@@ -58,8 +59,8 @@ module mastermind(
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-		//.guess_counter(guess_counter),
-		.curr_code(curr_code)
+	.guess_counter(guess_counter),
+	.curr_code(curr_code)
     );
     
     hex_decoder H0(
@@ -104,7 +105,7 @@ module mastermind_control(
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	output reg [1:0] compare_i,
-	output reg reach_result_4, reset_red_white
+	output reg reach_result_4, reset_red_white, erase_code
 );
 	
 	reg [7:0] current_state, next_state;
@@ -135,7 +136,8 @@ module mastermind_control(
 		RESULT_3 = 8'd22,
 		RESULT_3_again = 8'd23,
 		RESULT_4 = 8'd24,
-		RESULT_4_again = 8'd25;
+		RESULT_4_again = 8'd25,
+		ERASE_CODE = 8'd26;
         
 	always@(*)
     begin: state_table 
@@ -147,7 +149,8 @@ module mastermind_control(
         	LOAD_CODE_3: next_state = load ? LOAD_CODE_3_WAIT : LOAD_CODE_3;
         	LOAD_CODE_3_WAIT: next_state = load ? LOAD_CODE_3_WAIT : LOAD_CODE_4;
         	LOAD_CODE_4: next_state = load ? LOAD_CODE_4_WAIT : LOAD_CODE_4;
-        	LOAD_CODE_4_WAIT: next_state = load ? LOAD_CODE_4_WAIT : GUESS_1;
+        	LOAD_CODE_4_WAIT: next_state = load ? LOAD_CODE_4_WAIT : ERASE_CODE;
+		ERASE_CODE: next_state = load ? GUESS_1: ERASE_CODE;
         	GUESS_1: next_state = load ? GUESS_1_WAIT : GUESS_1;
         	GUESS_1_WAIT: next_state = load ? GUESS_1_WAIT : GUESS_2;
         	GUESS_2: next_state = load ? GUESS_2_WAIT : GUESS_2;
@@ -182,6 +185,7 @@ module mastermind_control(
 		compare_i = 2'd0;
 		reach_result_4 = 1'b0;
 		reset_red_white = 1'b0;
+		erase_code = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
@@ -196,33 +200,36 @@ module mastermind_control(
     		LOAD_CODE_4: begin
     			load_code_4 = 1'b1;
     		end
+		ERASE_CODE: begin
+			erase_code = 1'b1;
+		end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
-				reset_red_white = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
-				compare_i = 2'd0;
+			compare_i = 2'd0;
+			reset_red_white = 1'b1;
     		end
     		RESULT_0: begin
+			compare = 1'b1;
+			compare_i = 2'd0;
+    		end
+		RESULT_0_again: begin
 				compare = 1'b1;
 				compare_i = 2'd0;
     		end
-			RESULT_0_again: begin
-				compare = 1'b1;
-				compare_i = 2'd0;
-    		end
-			RESULT_1: begin
+		RESULT_1: begin
 				compare = 1'b1;
 				compare_i = 2'd1;
     		end
-			RESULT_2: begin
+		RESULT_2: begin
     			compare = 1'b1;
 				compare_i = 2'd2;
     		end
@@ -230,7 +237,7 @@ module mastermind_control(
 				compare = 1'b1;
 				compare_i = 2'd3;
     		end
-			RESULT_4: begin
+		RESULT_4: begin
 				compare = 1'b0;
 				compare_i = 2'd0;
 				reach_result_4 = 1'b1;
@@ -260,7 +267,7 @@ module mastermind_datapath(
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
-	//output reg [2:0] guess_counter,
+	output reg [2:0] guess_counter,
 	output reg [2:0] curr_code
 );
 	
@@ -300,8 +307,6 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-			//if (reach_result_4) begin
-			//end
         end
 		  
 	  // determine win or loss
@@ -355,12 +360,14 @@ module mastermind_datapath(
 	end
 
 	// increment guess_counter
-	//always @(posedge reach_result_4) begin
-	//	if (resetn) begin
-	//		guess_counter <= 3'd0;
-	//	end
-	//	guess_counter <= guess_counter + 1;
-	//end
+	always @(posedge clk) begin
+		if (!resetn) begin
+			guess_counter <= 3'd0;
+		end
+		if (reach_result_4) begin
+			guess_counter <= guess_counter + 1;
+		end
+	end
 	
 
 	compare c(
