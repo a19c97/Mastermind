@@ -20,6 +20,48 @@ module mastermind(
     //wire [2:0] guess_counter;
 	wire [2:0] curr_code;
 	
+	control ctrl(
+    	.clock(CLOCK_50),
+    	.resetn(resetn),
+    	.load(load),
+    	
+    	.compare(compare),
+		.compare_i(compare_i),
+    	.load_code_1(load_code_1),
+    	.load_code_2(load_code_2),
+    	.load_code_3(load_code_3),
+    	.load_code_4(load_code_4),
+    	.load_guess_1(load_guess_1),
+    	.load_guess_2(load_guess_2),
+    	.load_guess_3(load_guess_3),
+    	.load_guess_4(load_guess_4),
+    	.reach_result_4(reach_result_4),
+		.reset_red_white(reset_red_white)
+    );
+	
+	datapath data(
+    	.clock(CLOCK_50),
+    	.resetn(resetn),
+    	.data_in(SW[2:0]),
+    	.load_code_1(load_code_1),
+    	.load_code_2(load_code_2),
+    	.load_code_3(load_code_3),
+    	.load_code_4(load_code_4),
+    	.load_guess_1(load_guess_1),
+    	.load_guess_2(load_guess_2),
+    	.load_guess_3(load_guess_3),
+    	.load_guess_4(load_guess_4),
+		.compare_i(compare_i),
+		.compare(compare),
+		.reach_result_4(reach_result_4),
+		.reset_red_white(reset_red_white),
+		
+    	.code(code),
+    	.guess(guess),
+    	.red_out(red_out),
+    	.white_out(white_out),
+		.curr_code(curr_code)
+    );
 	
 	hex_decoder H0(
         .hex_digit({1'b0, code[2:0]}), 
@@ -155,7 +197,7 @@ module control(
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
-//				resetRedWhite = 1'b1;
+//				reset_red_white = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
@@ -196,14 +238,14 @@ module control(
 endmodule
 
 
-module mastermind_datapath(
+module datapath(
 	input clock,
 	input resetn,
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
 	input [1:0] compare_i,
-	input compare, reach_result_4, resetRedWhite,
+	input compare, reach_result_4, reset_red_white,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
