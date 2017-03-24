@@ -240,7 +240,7 @@ module mastermind_control(
     
     always@(posedge clk)
     begin: state_FFs
-        if(!resetn)
+        if (!resetn)
             current_state <= LOAD_CODE_1;
         else
             current_state <= next_state;
@@ -313,10 +313,10 @@ module mastermind_datapath(
 			//end
 		//end
 
-		if (red == 3'b100) begin
+		//if (red == 3'b100) begin
 			// Win! 
-			red_out <= 3'd8;
-			white_out <= 3'd8;
+		//	red_out <= 3'd8;
+		//	white_out <= 3'd8;
 		end
     end
 	
