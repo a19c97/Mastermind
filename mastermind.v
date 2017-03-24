@@ -131,11 +131,11 @@ module mastermind_control(
         RESULT_1 = 8'd18,
         RESULT_1_again = 8'd19,
         RESULT_2 = 8'd20,
-		  RESULT_2_again = 8'd21,
-		  RESULT_3 = 8'd22,
-		  RESULT_3_again = 8'd23,
-		  RESULT_4 = 8'd24,
-		  RESULT_4_again = 8'd25;
+		RESULT_2_again = 8'd21,
+		RESULT_3 = 8'd22,
+		RESULT_3_again = 8'd23,
+		RESULT_4 = 8'd24,
+		RESULT_4_again = 8'd25;
         
 	always@(*)
     begin: state_table 
@@ -266,7 +266,6 @@ module mastermind_datapath(
 	
 	wire [2:0] red, white; // number of red and white pegs in feedback
 	//reg [2:0] guess_counter; // counter to count up to 8 guesses
-	//reg [2:0] curr_code;
 	
 	// loading inputs
 	always @ (posedge clk) begin
@@ -305,19 +304,20 @@ module mastermind_datapath(
 			//end
         end
 		  
-		  // determine win or loss
-		  //if (guess_counter == 3) begin
-				//if (red != 3'b100) begin
-				// Game over! 
-				//red_out <= 3'b000;
-				//white_out <= 3'b000;
-				//end
+	  // determine win or loss
+	  //if (guess_counter == 3) begin
+			//if (red != 3'b100) begin
+			// Game over! 
+			//red_out <= 3'b000;
+			//white_out <= 3'b000;
 			//end
-			if (red == 3'b100) begin
-				// Win! 
-				red_out <= 3'd8;
-				white_out <= 3'd8;
-			end
+		//end
+
+		if (red == 3'b100) begin
+			// Win! 
+			red_out <= 3'd8;
+			white_out <= 3'd8;
+		end
     end
 	
 	always @(*) begin
