@@ -14,8 +14,8 @@ module slow_clock(reset_n, clock, slow_clock);
 		end
 		else
 		begin
-			if (q == (20'b11110100001001000000 - 1))
-			//if (q == 3'd4)
+			//if (q == (20'b11110100001001000000 - 1))
+			if (q == 3'd4)
 				begin
 				q <= 0;
 				slow_clock <= 1'b1;
