@@ -6,9 +6,10 @@ module mastermind(
     input CLOCK_50;
     output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
     
-    wire load, resetn;
+    wire load, resetn, reset_clock;
     assign resetn = KEY[1];
     assign load = ~KEY[0];
+    assign reset_clock = KEY[2];
     
     wire [11:0] code, guess;
     wire [2:0] red_out, white_out;
@@ -19,15 +20,18 @@ module mastermind(
     wire reach_result_4, reset_red_white, erase_code;
     wire [2:0] guess_counter;
     wire [2:0] curr_code;
+    wire slow_clock;
+    wire [27:0] q;
     
     mastermind_control ctrl(
-    	.clk(CLOCK_50),
+    	//.clk(CLOCK_50),
+	.clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
-		.compare_i(compare_i),
-		.reach_result_4(reach_result_4),
-		.reset_red_white(reset_red_white),
+	.compare_i(compare_i),
+	.reach_result_4(reach_result_4),
+	.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -40,7 +44,8 @@ module mastermind(
     );
     
     mastermind_datapath data(
-    	.clk(CLOCK_50),
+    	//.clk(CLOCK_50),
+	.clk(slow_clock),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
@@ -51,16 +56,23 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-		.compare_i(compare_i),
-		.compare(compare),
-		.reach_result_4(reach_result_4),
-		.reset_red_white(reset_red_white),
+	.compare_i(compare_i),
+	.compare(compare),
+	.reach_result_4(reach_result_4),
+	.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
 	.guess_counter(guess_counter),
 	.curr_code(curr_code)
+    );
+    
+    slow_clock sc(
+    	.clock(CLOCK_50),
+	.reset_n(reset_clock),
+	.slow_clock(slow_clock),
+	.q(q)
     );
     
     hex_decoder H0(
@@ -540,3 +552,36 @@ module hex_decoder(hex_digit, segments);
             default: segments = 7'h7f;
         endcase
 endmodule
+
+
+module slow_clock(reset_n, clock, slow_clock, q); 
+
+	input clock;
+	input reset_n;
+	output reg slow_clock;
+	output reg [27:0] q;
+	
+	always @(posedge clock)
+	begin 
+		if (!reset_n)
+		begin
+			q <= 28'd0;
+			slow_clock <= 1'b0;
+		end
+		else
+		begin
+			//if (q == (20'b11110100001001000000 - 1))
+			if (q == 27'd4)
+				begin
+				q <= 0;
+				slow_clock <= 1'b1;
+				end
+			else
+				begin
+				q <= q + 1'b1;
+				slow_clock <= 1'b0;
+				end
+		end
+	end
+endmodule
+
