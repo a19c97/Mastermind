@@ -25,13 +25,13 @@ module mastermind(
     
     mastermind_control ctrl(
     	//.clk(CLOCK_50),
-	.clk(slow_clock),
+	   .clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
-	.compare_i(compare_i),
-	.reach_result_4(reach_result_4),
-	.reset_red_white(reset_red_white),
+		.compare_i(compare_i),
+		.reach_result_4(reach_result_4),
+		.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -40,12 +40,12 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	.erase_code(erase_code)
+		.erase_code(erase_code)
     );
     
     mastermind_datapath data(
     	//.clk(CLOCK_50),
-	.clk(slow_clock),
+	   .clk(slow_clock),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
@@ -56,16 +56,16 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	.compare_i(compare_i),
-	.compare(compare),
-	.reach_result_4(reach_result_4),
-	.reset_red_white(reset_red_white),
+		.compare_i(compare_i),
+		.compare(compare),
+		.reach_result_4(reach_result_4),
+		.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-	.guess_counter(guess_counter),
-	.curr_code(curr_code)
+		.guess_counter(guess_counter),
+		.curr_code(curr_code)
     );
     
     slow_clock sc(
@@ -76,22 +76,22 @@ module mastermind(
     );
     
     hex_decoder H0(
-        .hex_digit({1'b0, code[2:0]}), 
+        .hex_digit({1'b0, guess[2:0]}), 
         .segments(HEX0)
     );
     
     hex_decoder H1(
-        .hex_digit({1'b0, code[5:3]}), 
+        .hex_digit({1'b0, guess[5:3]}), 
         .segments(HEX1)
     );
     
     hex_decoder H2(
-        .hex_digit({1'b0, code[8:6]}), 
+        .hex_digit({1'b0, guess[8:6]}), 
         .segments(HEX2)
     );
     
     hex_decoder H3(
-        .hex_digit({1'b0, code[11:9]}), 
+        .hex_digit({1'b0, guess[11:9]}), 
         .segments(HEX3)
     );
     
@@ -149,7 +149,8 @@ module mastermind_control(
 		RESULT_3_again = 8'd23,
 		RESULT_4 = 8'd24,
 		RESULT_4_again = 8'd25,
-		ERASE_CODE = 8'd26;
+		ERASE_CODE = 8'd26,
+		ERASE_CODE_WAIT = 8'd27;
         
 	always@(*)
     begin: state_table 
@@ -162,14 +163,15 @@ module mastermind_control(
         	LOAD_CODE_3_WAIT: next_state = load ? LOAD_CODE_3_WAIT : LOAD_CODE_4;
         	LOAD_CODE_4: next_state = load ? LOAD_CODE_4_WAIT : LOAD_CODE_4;
         	LOAD_CODE_4_WAIT: next_state = load ? LOAD_CODE_4_WAIT : ERASE_CODE;
-		ERASE_CODE: next_state = load ? GUESS_1: ERASE_CODE;
+			ERASE_CODE: next_state = load ? ERASE_CODE_WAIT: ERASE_CODE;
+			ERASE_CODE_WAIT: next_state = load ? ERASE_CODE_WAIT : GUESS_1;
         	GUESS_1: next_state = load ? GUESS_1_WAIT : GUESS_1;
         	GUESS_1_WAIT: next_state = load ? GUESS_1_WAIT : GUESS_2;
         	GUESS_2: next_state = load ? GUESS_2_WAIT : GUESS_2;
         	GUESS_2_WAIT: next_state = load ? GUESS_2_WAIT : GUESS_3;
         	GUESS_3: next_state = load ? GUESS_3_WAIT : GUESS_3;
         	GUESS_3_WAIT: next_state = load ? GUESS_3_WAIT : GUESS_4;
-        	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_3;
+        	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_4;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
 			RESULT_0: next_state = RESULT_1;
 			RESULT_1: next_state = RESULT_2;
