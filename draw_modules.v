@@ -13,7 +13,7 @@ module big_square(
     always @(posedge clock)
     begin
         if (!resetn)
-            Q => 0;
+            Q <= 0;
         else if (enable == 1'b1)
         begin
             if (Q == 9'b110001111) // 399 in binary
@@ -41,7 +41,7 @@ module medium_square(
     always @(posedge clock)
     begin
         if (!resetn)
-            Q => 0;
+            Q <= 0;
         else if (enable == 1'b1)
         begin
             if (Q == 7'b1100011) // 99 in binary
@@ -69,7 +69,7 @@ module small_squares(
     always @(posedge clock)
     begin
         if (!resetn)
-            Q => 0;
+            Q <= 0;
         else if (enable == 1'b1)
         begin
             if (Q == 4'b1111) // 99 in binary
