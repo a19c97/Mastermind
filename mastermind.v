@@ -17,7 +17,6 @@ module mastermind(
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
     wire draw_code_1, draw_code_2, draw_code_3, draw_code_4,
          draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4;
-    wire erase_code;
     wire draw_result;
     wire compare;
     wire [1:0] compare_i;
@@ -28,8 +27,8 @@ module mastermind(
     wire [27:0] q;
     
     mastermind_control ctrl(
-    	//.clk(CLOCK_50),
-		.clk(slow_clock),
+    	.clk(CLOCK_50),
+		//.clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
@@ -57,8 +56,9 @@ module mastermind(
     );
     
     mastermind_datapath data(
-    	//.clk(CLOCK_50),
-		.clk(slow_clock),
+    	.clk(CLOCK_50),
+		//.clk(slow_clock),
+        .fast_clk(CLOCK_50),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
@@ -79,7 +79,7 @@ module mastermind(
         .draw_guess_2(draw_guess_2),
         .draw_guess_3(draw_guess_3),
         .draw_guess_4(draw_guess_4),
-        .draw_result(draw_result)
+        .draw_result(draw_result),
 
 		.compare_i(compare_i),
 		.compare(compare),
@@ -146,7 +146,7 @@ module mastermind_control(
     output reg draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4,
     output reg draw_result,
 	output reg [1:0] compare_i,
-	output reg reach_result_4, reset_red_white, erase_code
+	output reg reach_result_4, reset_red_white
 );
 	
 	reg [7:0] current_state, next_state;
@@ -313,6 +313,7 @@ endmodule
 
 module mastermind_datapath(
 	input clk,
+    input fast_clk,
 	input resetn,
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
@@ -327,7 +328,12 @@ module mastermind_datapath(
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
 	output reg [2:0] guess_counter,
-	output reg [2:0] curr_code
+	output reg [2:0] curr_code,
+
+    output reg [6:0] x_out,
+    output reg [6:0] y_out,
+    output reg draw_out,
+    output reg [2:0] colour_out
 );
 	
 	wire [2:0] red, white; // number of red and white pegs in feedback
@@ -382,8 +388,70 @@ module mastermind_datapath(
 		//	red_out <= 3'd8;
 		//	white_out <= 3'd8;
 		//end
+        
+    end
+
+    // Drawing always block 
+    always @(*) begin
+        if (!resetn) begin
+            x_out <= 0;
+            y_out <= 0;
+            draw_out <= 0;
+            colour_out <= 0;
+        end
+        else begin
+            if (draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4 || draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4 || erase_code || draw_result)
+                draw_out <= 1'b1;
+
+            colour_out <= data_in;
+
+            // TODO: Add square values
+            if (draw_code_1) begin
+                x_out <= 7'd20;
+                y_out <= 7'd50;
+            end
+            if (draw_code_2) begin
+                x_out <= 7'd50;
+                y_out <= 7'd50;
+            end
+            if (draw_code_3) begin
+                x_out <= 7'd80;
+                y_out <= 7'd50;
+            end
+            if (draw_code_4) begin
+                x_out <= 7'd110;
+                y_out <= 7'd50;
+            end
+            if (draw_guess_1) begin
+                x_out <= 7'd10;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+            end
+            if (draw_guess_2) begin
+                x_out <= 7'd30;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+            end
+            if (draw_guess_3) begin
+                x_out <= 7'd50;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+            end
+            if (draw_guess_4) begin
+                x_out <= 7'd70;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+            end
+
+            if (erase_code) begin
+                x_out <= 7'd20;
+                y_out <= 7'd50;
+            end
+
+            if (draw_result) begin
+                x_out <= 7'd100;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+            end
+        end
     end
 	
+    // Red and white always block
 	always @(*) begin
 		if (!resetn) begin
 			red_out <= 3'd0;
@@ -395,6 +463,7 @@ module mastermind_datapath(
 		end
 	end
 	
+    // Curr code always block
 	always @(*) begin
 		if (!resetn) begin
 			curr_code <= 3'd0;
@@ -418,13 +487,16 @@ module mastermind_datapath(
 		end
 	end
 
-	// increment guess_counter
+	// Guess_counter
 	always @(posedge clk) begin
 		if (!resetn) begin
 			guess_counter <= 3'd0;
 		end
 		if (reach_result_4) begin
-			guess_counter <= guess_counter + 1;
+            if (guess_counter == 3'd7)
+                guess_counter <= 3'd0;
+            else
+			    guess_counter <= guess_counter + 1;
 		end
 	end
 	
