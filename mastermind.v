@@ -395,44 +395,52 @@ module mastermind_datapath(
         else begin
             draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1) ? 1'b1 : 1'b0;
 
-            colour_out <= data_in;
 
             if (load_code_1) begin
                 x_out <= 7'd10 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
+                colour_out <= data_in;
             end
             if (load_code_2) begin
                 x_out <= 7'd40 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
+                colour_out <= data_in;
             end
             if (load_code_3) begin
                 x_out <= 7'd70 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
+                colour_out <= data_in;
             end
             if (load_code_4) begin
                 x_out <= 7'd100 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
+                colour_out <= data_in;
             end
             if (load_guess_1) begin
                 x_out <= 7'd10 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                colour_out <= data_in;
             end
             if (load_guess_2) begin
                 x_out <= 7'd30 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                colour_out <= data_in;
             end
             if (load_guess_3) begin
                 x_out <= 7'd50 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                colour_out <= data_in;
             end
             if (load_guess_4) begin
                 x_out <= 7'd70 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                colour_out <= data_in;
             end
 
             if (erase_code) begin
                 x_out <= 7'd20;
                 y_out <= 7'd50;
+                colour_out <= data_in;
             end
 
             if (draw_result_1) begin

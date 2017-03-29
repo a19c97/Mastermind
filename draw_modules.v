@@ -54,11 +54,18 @@ module medium_square(
 endmodule
 
 
+module erase_code_squares(
+    input enable,
+    input clock,
+    input resetn,
+    input 
+
+
 module small_squares(
     input enable,
     input clock, // 50 MHz clock
     input resetn,
-    input x_out
+    input x_out,
     output [6:0] x,
     output [6:0] y
 );
