@@ -10,7 +10,7 @@ force {resetn} 0
 force {enable} 0
 force {peg_count[2]} 1
 force {peg_count[1]} 0
-force {peg_count[2]} 0
+force {peg_count[0]} 0
 
 run 2ns
 

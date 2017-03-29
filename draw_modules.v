@@ -86,56 +86,63 @@ module small_squares(
     input enable,
     input clock, // 50 MHz clock
     input resetn,
-    input [3:0] peg_count,
-    output [6:0] x,
+    input [2:0] peg_count,
+    output reg [6:0] x,
     output [6:0] y
 );
-    reg [3:0] Q;
+    reg [6:0] Q;
     
     always @(*) begin
-    	case ((peg_count)
-        	3'd0:
-        		x <= 7'b0;
-        	3'd1: begin
-        		if (Q % 7'b0010110 >= 7'b0000100)
-        			x <= 0;
-        		else
-        			x <= Q % 7'b0010110;
-        	end
-        	
-        	3'd2: begin
-        		if (Q % 7'b0010110 >= 7'b0001010)
-        			x <= 0;
-        		else if (Q % 7'b0010110 == 7'b0000100 ||
-        				 Q % 7'b0010110 == 7'b0000101)
-        			x <= 0;
-        		else
-        			x <= Q % 7'b0010110;
-        	end
-        	
-        	3'd3: begin
-        		if (Q % 7'b0010110 >= 7'b0010000)
-        			x <= 0;
-        		else if (Q % 7'b0010110 == 7'b0000100 ||
-        				 Q % 7'b0010110 == 7'b0000101 ||
-        				 Q % 7'b0010110 == 7'b0001010 ||
-        				 Q % 7'b0010110 == 7'b0001011)
-        			x <= 0;
-        		else
-        			x <= Q % 7'b0010110;
-        	end
-        	
-        	3'd4: begin
-        		if (Q % 7'b0010110 == 7'b0000100 ||
-        				 Q % 7'b0010110 == 7'b0000101 ||
-        				 Q % 7'b0010110 == 7'b0001010 ||
-        				 Q % 7'b0010110 == 7'b0001011 ||
-        				 Q % 7'b0010110 == 7'b0010000 ||
-        				 Q % 7'b0010110 == 7'b0010001)
-        			x <= 0;
-        		else
-        			x <= Q % 7'b0010110;
-        	end
+        if (!resetn)
+            x <= 0;
+        else begin
+            case (peg_count)
+                3'd0: begin
+                    x <= 7'b0;
+                end
+                3'd1: begin
+                    if (Q % 7'b0010110 >= 7'b0000100)
+                        x <= 0;
+                    else
+                        x <= Q % 7'b0010110;
+                end
+                
+                3'd2: begin
+                    if (Q % 7'b0010110 >= 7'b0001010)
+                        x <= 0;
+                    else if (Q % 7'b0010110 == 7'b0000100 ||
+                             Q % 7'b0010110 == 7'b0000101)
+                        x <= 0;
+                    else
+                        x <= Q % 7'b0010110;
+                end
+                
+                3'd3: begin
+                    if (Q % 7'b0010110 >= 7'b0010000)
+                        x <= 0;
+                    else if (Q % 7'b0010110 == 7'b0000100 ||
+                             Q % 7'b0010110 == 7'b0000101 ||
+                             Q % 7'b0010110 == 7'b0001010 ||
+                             Q % 7'b0010110 == 7'b0001011)
+                        x <= 0;
+                    else
+                        x <= Q % 7'b0010110;
+                end
+                
+                3'd4: begin
+                    if (Q % 7'b0010110 == 7'b0000100 ||
+                             Q % 7'b0010110 == 7'b0000101 ||
+                             Q % 7'b0010110 == 7'b0001010 ||
+                             Q % 7'b0010110 == 7'b0001011 ||
+                             Q % 7'b0010110 == 7'b0010000 ||
+                             Q % 7'b0010110 == 7'b0010001)
+                        x <= 0;
+                    else
+                        x <= Q % 7'b0010110;
+                end
+
+                default: x <= 0;
+            endcase
         end
     end
 
