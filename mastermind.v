@@ -887,7 +887,7 @@ module erase_code_squares(
         end
     end
 
-endmodule
+endmodule */
 
 
 module small_squares(
