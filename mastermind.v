@@ -15,10 +15,10 @@ module mastermind(
     wire [2:0] red_out, white_out;
     wire load_code_1, load_code_2, load_code_3, load_code_4, 
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
-    wire draw_result;
+    wire draw_result_1, draw_result_2
     wire compare;
     wire [1:0] compare_i;
-    wire reach_result_4, reset_red_white, erase_code;
+    wire reach_result_5, reset_red_white, erase_code;
     wire [2:0] guess_counter;
     wire [2:0] curr_code;
     wire slow_clock;
@@ -35,7 +35,7 @@ module mastermind(
     	.load(load),	
     	.compare(compare),
 		.compare_i(compare_i),
-		.reach_result_4(reach_result_4),
+		.reach_result_5(reach_result_4),
 		.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
@@ -46,7 +46,8 @@ module mastermind(
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
 		.erase_code(erase_code),
-        .draw_result(draw_result)
+        .draw_result_1(draw_result_1),
+        .draw_result_2(draw_result_2)
     );
     
     mastermind_datapath data(
@@ -65,11 +66,12 @@ module mastermind(
     	.load_guess_4(load_guess_4),
 
         .erase_code(erase_code),
-        .draw_result(draw_result),
+        .draw_result_1(draw_result_1),
+        .draw_result_2(draw_result_2),
 
 		.compare_i(compare_i),
 		.compare(compare),
-		.reach_result_4(reach_result_4),
+		.reach_result_5(reach_result_4),
 		.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
@@ -133,9 +135,9 @@ module mastermind_control(
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
     output reg erase_code,
-    output reg draw_result,
+    output reg draw_result_1, draw_result_2,
 	output reg [1:0] compare_i,
-	output reg reach_result_4, reset_red_white
+	output reg reach_result_5, reset_red_white
 );
 	
 	reg [7:0] current_state, next_state;
@@ -162,8 +164,9 @@ module mastermind_control(
         RESULT_2 = 8'd18,
 		RESULT_3 = 8'd19,
 		RESULT_4 = 8'd20,
-		ERASE_CODE = 8'd21,
-		ERASE_CODE_WAIT = 8'd22;
+        RESULT_5 = 8'd21,
+		ERASE_CODE = 8'd22,
+		ERASE_CODE_WAIT = 8'd23;
         
 	always@(*)
     begin: state_table 
@@ -190,7 +193,8 @@ module mastermind_control(
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = RESULT_4;
-			RESULT_4: next_state = GUESS_1;
+			RESULT_4: next_state = RESULT_5;
+            RESULT_5: next_state = LOAD_GUESS_1;
 			default: next_state = LOAD_CODE_1;
     	endcase
     end
@@ -210,11 +214,12 @@ module mastermind_control(
 
         erase_code = 1'b0;
 
-        draw_result = 1'b0;
+        draw_result_1 = 1'b0;
+        draw_result_2 = 1'b0;
         
 		compare = 1'b0;
 		compare_i = 2'd0;
-		reach_result_4 = 1'b0;
+		reach_result_5 = 1'b0;
 		reset_red_white = 1'b0;
 		
     	case (current_state)
@@ -244,12 +249,10 @@ module mastermind_control(
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
-			    compare_i = 2'd0;
 			    reset_red_white = 1'b1;
     		end
     		RESULT_0: begin
 			    compare = 1'b1;
-			    compare_i = 2'd0;
     		end
 		    RESULT_1: begin
 				compare = 1'b1;
@@ -264,11 +267,12 @@ module mastermind_control(
 				compare_i = 2'd3;
     		end
 		    RESULT_4: begin
-				compare = 1'b0;
-				compare_i = 2'd0;
-				reach_result_4 = 1'b1;
-                draw_result = 1'b1;
+                draw_result_1 = 1'b1;
     		end
+            RESULT_5: begin
+                draw_result_2 = 1'b1;
+				reach_result_5 = 1'b1;
+            end
     	endcase
     end
     
@@ -291,9 +295,9 @@ module mastermind_datapath(
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
     input erase_code,
-    input draw_result,
+    input draw_result_1,
 	input [1:0] compare_i,
-	input compare, reach_result_4, reset_red_white,
+	input compare, reach_result_5, reset_red_white,
 	
 	output reg [11:0] code, guess,
 	output reg [2:0] red_out, white_out,
@@ -389,11 +393,10 @@ module mastermind_datapath(
             colour_out <= 0;
         end
         else begin
-            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result) ? 1'b1 : 1'b0;
+            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1) ? 1'b1 : 1'b0;
 
             colour_out <= data_in;
 
-            // TODO: Add square values
             if (load_code_1) begin
                 x_out <= 7'd10 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
@@ -432,7 +435,7 @@ module mastermind_datapath(
                 y_out <= 7'd50;
             end
 
-            if (draw_result) begin
+            if (draw_result_1) begin
                 x_out <= 7'd100;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
             end
@@ -480,7 +483,7 @@ module mastermind_datapath(
 		if (!resetn) begin
 			guess_counter <= 3'd0;
 		end
-		if (reach_result_4) begin
+		if (reach_result_5) begin
             if (guess_counter == 3'd7)
                 guess_counter <= 3'd0;
             else
