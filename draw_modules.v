@@ -101,44 +101,44 @@ module small_squares(
                     x <= 7'b0;
                 end
                 3'd1: begin
-                    if (Q % 7'b0010110 >= 7'b0000100)
+                    if (Q % 7'd22 >= 7'd4)
                         x <= 0;
                     else
-                        x <= Q % 7'b0010110;
+                        x <= Q % 7'd22;
                 end
                 
                 3'd2: begin
-                    if (Q % 7'b0010110 >= 7'b0001010)
+                    if (Q % 7'd22 >= 7'd10)
                         x <= 0;
-                    else if (Q % 7'b0010110 == 7'b0000100 ||
-                             Q % 7'b0010110 == 7'b0000101)
+                    else if (Q % 7'd22 == 7'd4 ||
+                             Q % 7'd22 == 7'd5)
                         x <= 0;
                     else
-                        x <= Q % 7'b0010110;
+                        x <= Q % 7'd22;
                 end
                 
                 3'd3: begin
-                    if (Q % 7'b0010110 >= 7'b0010000)
+                    if (Q % 7'd22 >= 7'd16)
                         x <= 0;
-                    else if (Q % 7'b0010110 == 7'b0000100 ||
-                             Q % 7'b0010110 == 7'b0000101 ||
-                             Q % 7'b0010110 == 7'b0001010 ||
-                             Q % 7'b0010110 == 7'b0001011)
+                    else if (Q % 7'd22 == 7'd4 ||
+                             Q % 7'd22 == 7'd5 ||
+                             Q % 7'd22 == 7'd10 ||
+                             Q % 7'd22 == 7'd11)
                         x <= 0;
                     else
-                        x <= Q % 7'b0010110;
+                        x <= Q % 7'd22;
                 end
                 
                 3'd4: begin
-                    if (Q % 7'b0010110 == 7'b0000100 ||
-                             Q % 7'b0010110 == 7'b0000101 ||
-                             Q % 7'b0010110 == 7'b0001010 ||
-                             Q % 7'b0010110 == 7'b0001011 ||
-                             Q % 7'b0010110 == 7'b0010000 ||
-                             Q % 7'b0010110 == 7'b0010001)
+                    if (Q % 7'd22 == 7'd4 ||
+                             Q % 7'd22 == 7'd5 ||
+                             Q % 7'd22 == 7'd10 ||
+                             Q % 7'd22 == 7'd11 ||
+                             Q % 7'd22 == 7'd16 ||
+                             Q % 7'd22 == 7'd17)
                         x <= 0;
                     else
-                        x <= Q % 7'b0010110;
+                        x <= Q % 7'd22;
                 end
 
                 default: x <= 0;
@@ -146,7 +146,7 @@ module small_squares(
         end
     end
 
-    assign y = Q / 7'b0010110; // floor division by 22
+    assign y = Q / 7'd22; // floor division by 22
 
     always @(posedge clock)
     begin
@@ -154,7 +154,7 @@ module small_squares(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 7'b1010111) // 87 in binary
+            if (Q == 7'd87) // 87 in binary
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
