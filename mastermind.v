@@ -395,19 +395,19 @@ module mastermind_datapath(
 
             // TODO: Add square values
             if (load_code_1) begin
-                x_out <= 7'd20 + big_x[6:0];
+                x_out <= 7'd10 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
             if (load_code_2) begin
-                x_out <= 7'd50 + big_x[6:0];
+                x_out <= 7'd40 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
             if (load_code_3) begin
-                x_out <= 7'd80 + big_x[6:0];
+                x_out <= 7'd70 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
             if (load_code_4) begin
-                x_out <= 7'd110 + big_x[6:0];
+                x_out <= 7'd100 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
             if (load_guess_1) begin
