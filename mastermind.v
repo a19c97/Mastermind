@@ -25,7 +25,7 @@ module mastermind(
     
     mastermind_control ctrl(
     	//.clk(CLOCK_50),
-	   .clk(slow_clock),
+		.clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
@@ -45,7 +45,7 @@ module mastermind(
     
     mastermind_datapath data(
     	//.clk(CLOCK_50),
-	   .clk(slow_clock),
+		.clk(slow_clock),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
@@ -70,9 +70,9 @@ module mastermind(
     
     slow_clock sc(
     	.clock(CLOCK_50),
-	.reset_n(reset_clock),
-	.slow_clock(slow_clock),
-	.q(q)
+		.reset_n(reset_clock),
+		.slow_clock(slow_clock),
+		.q(q)
     );
     
     hex_decoder H0(
