@@ -15,6 +15,10 @@ module mastermind(
     wire [2:0] red_out, white_out;
     wire load_code_1, load_code_2, load_code_3, load_code_4, 
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
+    wire draw_code_1, draw_code_2, draw_code_3, draw_code_4,
+         draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4;
+    wire erase_code;
+    wire draw_result;
     wire compare;
     wire [1:0] compare_i;
     wire reach_result_4, reset_red_white, erase_code;
@@ -40,7 +44,16 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-		.erase_code(erase_code)
+		.erase_code(erase_code),
+        .draw_code_1(draw_code_1),
+        .draw_code_2(draw_code_2),
+        .draw_code_3(draw_code_3),
+        .draw_code_4(draw_code_4),
+        .draw_guess_1(draw_guess_1),
+        .draw_guess_2(draw_guess_2),
+        .draw_guess_3(draw_guess_3),
+        .draw_guess_4(draw_guess_4),
+        .draw_result(draw_result)
     );
     
     mastermind_datapath data(
@@ -56,6 +69,18 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
+
+        .erase_code(erase_code),
+        .draw_code_1(draw_code_1),
+        .draw_code_2(draw_code_2),
+        .draw_code_3(draw_code_3),
+        .draw_code_4(draw_code_4),
+        .draw_guess_1(draw_guess_1),
+        .draw_guess_2(draw_guess_2),
+        .draw_guess_3(draw_guess_3),
+        .draw_guess_4(draw_guess_4),
+        .draw_result(draw_result)
+
 		.compare_i(compare_i),
 		.compare(compare),
 		.reach_result_4(reach_result_4),
@@ -116,6 +141,10 @@ module mastermind_control(
 	output reg compare, 
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
+    output reg draw_code_1, draw_code_2, draw_code_3, draw_code_4,
+    output reg erase_code,
+    output reg draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4,
+    output reg draw_result,
 	output reg [1:0] compare_i,
 	output reg reach_result_4, reset_red_white, erase_code
 );
@@ -140,17 +169,12 @@ module mastermind_control(
         GUESS_4 = 8'd14,
         GUESS_4_WAIT = 8'd15,
         RESULT_0 = 8'd16,
-        RESULT_0_again = 8'd17,
-        RESULT_1 = 8'd18,
-        RESULT_1_again = 8'd19,
-        RESULT_2 = 8'd20,
-		RESULT_2_again = 8'd21,
-		RESULT_3 = 8'd22,
-		RESULT_3_again = 8'd23,
-		RESULT_4 = 8'd24,
-		RESULT_4_again = 8'd25,
-		ERASE_CODE = 8'd26,
-		ERASE_CODE_WAIT = 8'd27;
+        RESULT_1 = 8'd17,
+        RESULT_2 = 8'd18,
+		RESULT_3 = 8'd19,
+		RESULT_4 = 8'd20,
+		ERASE_CODE = 8'd21,
+		ERASE_CODE_WAIT = 8'd22;
         
 	always@(*)
     begin: state_table 
@@ -177,7 +201,7 @@ module mastermind_control(
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = RESULT_4;
-			RESULT_4: next_state = GUESS_1;
+			RESULT_4: next_state = LOAD_CODE_1;
 			default: next_state = LOAD_CODE_1;
     	endcase
     end
@@ -194,56 +218,73 @@ module mastermind_control(
 		load_guess_2 = 1'b0;
 		load_guess_3 = 1'b0;
 		load_guess_4 = 1'b0;
- 		
+
+        draw_code_1 = 1'b0;
+        draw_code_2 = 1'b0;
+        draw_code_3 = 1'b0;
+        draw_code_4 = 1'b0;
+
+        erase_code = 1'b0;
+
+        draw_guess_1 = 1'b0;
+        draw_guess_2 = 1'b0;
+        draw_guess_3 = 1'b0;
+        draw_guess_4 = 1'b0;
+
+        draw_result = 1'b0;
+        
 		compare = 1'b0;
 		compare_i = 2'd0;
 		reach_result_4 = 1'b0;
 		reset_red_white = 1'b0;
-		erase_code = 1'b0;
 		
     	case (current_state)
     		LOAD_CODE_1: begin
     			load_code_1 = 1'b1;
+                draw_code_1 = 1'b1;
     		end
     		LOAD_CODE_2: begin
     			load_code_2 = 1'b1;
+                draw_code_2 = 1'b1;
     		end
     		LOAD_CODE_3: begin
     			load_code_3 = 1'b1;
+                draw_code_3 = 1'b1;
     		end
     		LOAD_CODE_4: begin
     			load_code_4 = 1'b1;
+                draw_code_4 = 1'b1;
     		end
-		ERASE_CODE: begin
-			erase_code = 1'b1;
-		end
+		    ERASE_CODE: begin
+			    erase_code = 1'b1;
+		    end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
+                draw_guess_1 = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
+                draw_guess_2 = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
+                draw_guess_3 = 1'b1;
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
-			compare_i = 2'd0;
-			reset_red_white = 1'b1;
+                draw_guess_4 = 1'b1;
+			    compare_i = 2'd0;
+			    reset_red_white = 1'b1;
     		end
     		RESULT_0: begin
-			compare = 1'b1;
-			compare_i = 2'd0;
+			    compare = 1'b1;
+			    compare_i = 2'd0;
     		end
-		RESULT_0_again: begin
-				compare = 1'b1;
-				compare_i = 2'd0;
-    		end
-		RESULT_1: begin
+		    RESULT_1: begin
 				compare = 1'b1;
 				compare_i = 2'd1;
     		end
-		RESULT_2: begin
+		    RESULT_2: begin
     			compare = 1'b1;
 				compare_i = 2'd2;
     		end
@@ -251,7 +292,7 @@ module mastermind_control(
 				compare = 1'b1;
 				compare_i = 2'd3;
     		end
-		RESULT_4: begin
+		    RESULT_4: begin
 				compare = 1'b0;
 				compare_i = 2'd0;
 				reach_result_4 = 1'b1;
@@ -276,6 +317,10 @@ module mastermind_datapath(
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
+    input draw_code_1, draw_code_2, draw_code_3, draw_code_4,
+    input erase_code,
+    input draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4,
+    input draw_result,
 	input [1:0] compare_i,
 	input compare, reach_result_4, reset_red_white,
 	
