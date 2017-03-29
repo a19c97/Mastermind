@@ -25,6 +25,10 @@ module mastermind(
     wire [2:0] curr_code;
     wire slow_clock;
     wire [27:0] q;
+
+    wire [6:0] x_out, y_out;
+    wire draw_out;
+    wire [2:0] colour_out;
     
     mastermind_control ctrl(
     	.clk(CLOCK_50),
@@ -90,7 +94,12 @@ module mastermind(
     	.red_out(red_out),
     	.white_out(white_out),
 		.guess_counter(guess_counter),
-		.curr_code(curr_code)
+		.curr_code(curr_code),
+
+        .x_out(x_out),
+        .y_out(y_out),
+        .draw_out(draw_out),
+        .colour_out(colour_out)
     );
     
     slow_clock sc(
