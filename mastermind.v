@@ -15,8 +15,6 @@ module mastermind(
     wire [2:0] red_out, white_out;
     wire load_code_1, load_code_2, load_code_3, load_code_4, 
          load_guess_1, load_guess_2, load_guess_3, load_guess_4;
-    wire draw_code_1, draw_code_2, draw_code_3, draw_code_4,
-         draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4;
     wire draw_result;
     wire compare;
     wire [1:0] compare_i;
@@ -48,14 +46,6 @@ module mastermind(
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
 		.erase_code(erase_code),
-        .draw_code_1(draw_code_1),
-        .draw_code_2(draw_code_2),
-        .draw_code_3(draw_code_3),
-        .draw_code_4(draw_code_4),
-        .draw_guess_1(draw_guess_1),
-        .draw_guess_2(draw_guess_2),
-        .draw_guess_3(draw_guess_3),
-        .draw_guess_4(draw_guess_4),
         .draw_result(draw_result)
     );
     
@@ -75,14 +65,6 @@ module mastermind(
     	.load_guess_4(load_guess_4),
 
         .erase_code(erase_code),
-        .draw_code_1(draw_code_1),
-        .draw_code_2(draw_code_2),
-        .draw_code_3(draw_code_3),
-        .draw_code_4(draw_code_4),
-        .draw_guess_1(draw_guess_1),
-        .draw_guess_2(draw_guess_2),
-        .draw_guess_3(draw_guess_3),
-        .draw_guess_4(draw_guess_4),
         .draw_result(draw_result),
 
 		.compare_i(compare_i),
@@ -150,9 +132,7 @@ module mastermind_control(
 	output reg compare, 
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
-    output reg draw_code_1, draw_code_2, draw_code_3, draw_code_4,
     output reg erase_code,
-    output reg draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4,
     output reg draw_result,
 	output reg [1:0] compare_i,
 	output reg reach_result_4, reset_red_white
@@ -228,17 +208,7 @@ module mastermind_control(
 		load_guess_3 = 1'b0;
 		load_guess_4 = 1'b0;
 
-        draw_code_1 = 1'b0;
-        draw_code_2 = 1'b0;
-        draw_code_3 = 1'b0;
-        draw_code_4 = 1'b0;
-
         erase_code = 1'b0;
-
-        draw_guess_1 = 1'b0;
-        draw_guess_2 = 1'b0;
-        draw_guess_3 = 1'b0;
-        draw_guess_4 = 1'b0;
 
         draw_result = 1'b0;
         
@@ -250,38 +220,30 @@ module mastermind_control(
     	case (current_state)
     		LOAD_CODE_1: begin
     			load_code_1 = 1'b1;
-                draw_code_1 = 1'b1;
     		end
     		LOAD_CODE_2: begin
     			load_code_2 = 1'b1;
-                draw_code_2 = 1'b1;
     		end
     		LOAD_CODE_3: begin
     			load_code_3 = 1'b1;
-                draw_code_3 = 1'b1;
     		end
     		LOAD_CODE_4: begin
     			load_code_4 = 1'b1;
-                draw_code_4 = 1'b1;
     		end
 		    ERASE_CODE: begin
 			    erase_code = 1'b1;
 		    end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
-                draw_guess_1 = 1'b1;
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
-                draw_guess_2 = 1'b1;
     		end
     		GUESS_3: begin
     			load_guess_3 = 1'b1;
-                draw_guess_3 = 1'b1;
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
-                draw_guess_4 = 1'b1;
 			    compare_i = 2'd0;
 			    reset_red_white = 1'b1;
     		end
@@ -328,9 +290,7 @@ module mastermind_datapath(
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
-    input draw_code_1, draw_code_2, draw_code_3, draw_code_4,
     input erase_code,
-    input draw_guess_1, draw_guess_2, draw_guess_3, draw_guess_4,
     input draw_result,
 	input [1:0] compare_i,
 	input compare, reach_result_4, reset_red_white,
@@ -405,7 +365,7 @@ module mastermind_datapath(
     
     
     big_square bs_counter(
-    	.enable(draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4),
+    	.enable(load_code_1 || load_code_2 || load_code_3 || load_code_4),
     	.clock(fast_clk),
     	.resetn(resetn),
     	.x(big_x),
@@ -413,7 +373,7 @@ module mastermind_datapath(
     );
     
     medium_square ms_counter(
-    	.enable(draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4),
+    	.enable(load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4),
     	.clock(fast_clk),
     	.resetn(resetn),
     	.x(medium_x),
@@ -429,40 +389,40 @@ module mastermind_datapath(
             colour_out <= 0;
         end
         else begin
-            draw_out <= (draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4 || draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4 || erase_code || draw_result) ? 1'b1 : 1'b0;
+            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result) ? 1'b1 : 1'b0;
 
             colour_out <= data_in;
 
             // TODO: Add square values
-            if (draw_code_1) begin
+            if (load_code_1) begin
                 x_out <= 7'd20 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
-            if (draw_code_2) begin
+            if (load_code_2) begin
                 x_out <= 7'd50 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
-            if (draw_code_3) begin
+            if (load_code_3) begin
                 x_out <= 7'd80 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
-            if (draw_code_4) begin
+            if (load_code_4) begin
                 x_out <= 7'd110 + big_x[6:0];
                 y_out <= 7'd50 + big_y[6:0];
             end
-            if (draw_guess_1) begin
+            if (load_guess_1) begin
                 x_out <= 7'd10 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
-            if (draw_guess_2) begin
+            if (load_guess_2) begin
                 x_out <= 7'd30 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
-            if (draw_guess_3) begin
+            if (load_guess_3) begin
                 x_out <= 7'd50 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
-            if (draw_guess_4) begin
+            if (load_guess_4) begin
                 x_out <= 7'd70 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
