@@ -1,10 +1,28 @@
 module mastermind(
-	SW, KEY, CLOCK_50, HEX5, HEX4, HEX3, HEX2, HEX1, HEX0
+	SW, KEY, CLOCK_50, HEX5, HEX4, HEX3, HEX2, HEX1, HEX0,
+	VGA_CLK,   						//	VGA Clock
+	VGA_HS,							//	VGA H_SYNC
+	VGA_VS,							//	VGA V_SYNC
+	VGA_BLANK_N,						//	VGA BLANK
+	VGA_SYNC_N,						//	VGA SYNC
+	VGA_R,   						//	VGA Red[9:0]
+	VGA_G,	 						//	VGA Green[9:0]
+	VGA_B   						//	VGA Blue[9:0]
 );
     input [9:0] SW;
     input [3:0] KEY;
     input CLOCK_50;
     output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
+    
+    // VGA outputs
+    output			VGA_CLK;   				//	VGA Clock
+	output			VGA_HS;					//	VGA H_SYNC
+	output			VGA_VS;					//	VGA V_SYNC
+	output			VGA_BLANK_N;				//	VGA BLANK
+	output			VGA_SYNC_N;				//	VGA SYNC
+	output	[9:0]	VGA_R;   				//	VGA Red[9:0]
+	output	[9:0]	VGA_G;	 				//	VGA Green[9:0]
+	output	[9:0]	VGA_B;   				//	VGA Blue[9:0]
     
     wire load, resetn, reset_clock;
     assign resetn = KEY[1];
@@ -27,6 +45,26 @@ module mastermind(
     wire [6:0] x_out, y_out;
     wire draw_out;
     wire [2:0] colour_out;
+    
+    vga_adapter VGA(
+			.resetn(resetn),
+			.clock(CLOCK_50),
+			.colour(colour_out),
+			.x(x_out),
+			.y(y_out),
+			.plot(draw_out),
+			.VGA_R(VGA_R),
+			.VGA_G(VGA_G),
+			.VGA_B(VGA_B),
+			.VGA_HS(VGA_HS),
+			.VGA_VS(VGA_VS),
+			.VGA_BLANK(VGA_BLANK_N),
+			.VGA_SYNC(VGA_SYNC_N),
+			.VGA_CLK(VGA_CLK));
+	defparam VGA.RESOLUTION = "160x120";
+	defparam VGA.MONOCHROME = "FALSE";		
+	defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
+	defparam VGA.BACKGROUND_IMAGE = "black.mif";
     
     mastermind_control ctrl(
     	//.clk(CLOCK_50),
