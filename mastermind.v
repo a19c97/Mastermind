@@ -210,7 +210,7 @@ module mastermind_control(
 			RESULT_1: next_state = RESULT_2;
 			RESULT_2: next_state = RESULT_3;
 			RESULT_3: next_state = RESULT_4;
-			RESULT_4: next_state = LOAD_CODE_1;
+			RESULT_4: next_state = GUESS_1;
 			default: next_state = LOAD_CODE_1;
     	endcase
     end
@@ -305,6 +305,7 @@ module mastermind_control(
 				compare = 1'b0;
 				compare_i = 2'd0;
 				reach_result_4 = 1'b1;
+                draw_result = 1'b1;
     		end
     	endcase
     end
@@ -346,7 +347,6 @@ module mastermind_datapath(
 );
 	
 	wire [2:0] red, white; // number of red and white pegs in feedback
-	//reg [2:0] guess_counter; // counter to count up to 8 guesses
 	
 	// loading inputs
 	always @ (posedge clk) begin
@@ -369,8 +369,6 @@ module mastermind_datapath(
 			end   
 			if (load_guess_1) begin
 				guess[2:0] <= data_in;
-				//red_out <= 3'd0;
-				//white_out <= 3'd0;
 			end
 			if (load_guess_2) begin
 				guess[5:3] <= data_in;
@@ -409,8 +407,7 @@ module mastermind_datapath(
             colour_out <= 0;
         end
         else begin
-            if (draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4 || draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4 || erase_code || draw_result)
-                draw_out <= 1'b1;
+            draw_out <= (draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4 || draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4 || erase_code || draw_result) ? 1'b1 : 1'b0;
 
             colour_out <= data_in;
 
