@@ -58,8 +58,9 @@ module small_squares(
     input enable,
     input clock, // 50 MHz clock
     input resetn,
-    output [3:0] x,
-    output [3:0] y
+    input x_out
+    output [6:0] x,
+    output [6:0] y
 );
     reg [3:0] Q;
     
@@ -72,7 +73,7 @@ module small_squares(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 4'b1111) // 99 in binary
+            if (Q == 7'b1110111) // 119 in binary
                 Q <= 0;
             else
                 Q <= Q + 1'b1;

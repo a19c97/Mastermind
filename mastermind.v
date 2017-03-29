@@ -31,8 +31,8 @@ module mastermind(
     wire [2:0] colour_out;
     
     mastermind_control ctrl(
-    	.clk(CLOCK_50),
-		//.clk(slow_clock),
+    	//.clk(CLOCK_50),
+		.clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
@@ -60,8 +60,8 @@ module mastermind(
     );
     
     mastermind_datapath data(
-    	.clk(CLOCK_50),
-		//.clk(slow_clock),
+    	//.clk(CLOCK_50),
+		.clk(slow_clock),
         .fast_clk(CLOCK_50),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
@@ -397,6 +397,28 @@ module mastermind_datapath(
 		//end
         
     end
+    
+    // Drawing modules
+    
+    wire [8:0] big_x, big_y;
+    wire [6:0] medium_x, medium_y;
+    
+    
+    big_square bs_counter(
+    	.enable(draw_code_1 || draw_code_2 || draw_code_3 || draw_code_4),
+    	.clock(fast_clk),
+    	.resetn(resetn),
+    	.x(big_x),
+    	.y(big_y)
+    );
+    
+    medium_square ms_counter(
+    	.enable(draw_guess_1 || draw_guess_2 || draw_guess_3 || draw_guess_4),
+    	.clock(fast_clk),
+    	.resetn(resetn),
+    	.x(medium_x),
+    	.y(medium_y)
+    );
 
     // Drawing always block 
     always @(*) begin
@@ -413,36 +435,36 @@ module mastermind_datapath(
 
             // TODO: Add square values
             if (draw_code_1) begin
-                x_out <= 7'd20;
-                y_out <= 7'd50;
+                x_out <= 7'd20 + big_x[6:0];
+                y_out <= 7'd50 + big_y[6:0];
             end
             if (draw_code_2) begin
-                x_out <= 7'd50;
-                y_out <= 7'd50;
+                x_out <= 7'd50 + big_x[6:0];
+                y_out <= 7'd50 + big_y[6:0];
             end
             if (draw_code_3) begin
-                x_out <= 7'd80;
-                y_out <= 7'd50;
+                x_out <= 7'd80 + big_x[6:0];
+                y_out <= 7'd50 + big_y[6:0];
             end
             if (draw_code_4) begin
-                x_out <= 7'd110;
-                y_out <= 7'd50;
+                x_out <= 7'd110 + big_x[6:0];
+                y_out <= 7'd50 + big_y[6:0];
             end
             if (draw_guess_1) begin
-                x_out <= 7'd10;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+                x_out <= 7'd10 + medium_x;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
             if (draw_guess_2) begin
-                x_out <= 7'd30;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+                x_out <= 7'd30 + medium_x;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
             if (draw_guess_3) begin
-                x_out <= 7'd50;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+                x_out <= 7'd50 + medium_x;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
             if (draw_guess_4) begin
-                x_out <= 7'd70;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter});
+                x_out <= 7'd70 + medium_x;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
             end
 
             if (erase_code) begin
@@ -696,7 +718,7 @@ module slow_clock(reset_n, clock, slow_clock, q);
 		else
 		begin
 			//if (q == (20'b11110100001001000000 - 1))
-			if (q == 27'd4)
+			if (q == 27'd3)
 				begin
 				q <= 0;
 				slow_clock <= 1'b1;
@@ -708,5 +730,61 @@ module slow_clock(reset_n, clock, slow_clock, q);
 				end
 		end
 	end
+endmodule
+
+
+module big_square(
+    input enable,
+    input clock, // 50 MHz clock
+    input resetn,
+    output [8:0] x,
+    output [8:0] y
+);
+    reg [8:0] Q;
+    
+    assign x = Q % 9'b000010100; // modulo 20
+    assign y = Q / 9'b000010100; // floor division by 20
+
+    always @(posedge clock)
+    begin
+        if (!resetn)
+            Q <= 0;
+        else if (enable == 1'b1)
+        begin
+            if (Q == 9'b110001111) // 399 in binary
+                Q <= 0;
+            else
+                Q <= Q + 1'b1;
+        end
+    end
+
+endmodule
+
+
+module medium_square(
+    input enable,
+    input clock, // 50 MHz clock
+    input resetn,
+    output [6:0] x,
+    output [6:0] y
+);
+    reg [6:0] Q;
+    
+    assign x = Q % 7'b0001010; // modulo 10
+    assign y = Q / 7'b0001010; // floor division by 10
+
+    always @(posedge clock)
+    begin
+        if (!resetn)
+            Q <= 0;
+        else if (enable == 1'b1)
+        begin
+            if (Q == 7'b1100011) // 99 in binary
+                Q <= 0;
+            else
+                Q <= Q + 1'b1;
+        end
+    end
+
 endmodule
 
