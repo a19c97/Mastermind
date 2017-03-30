@@ -504,10 +504,10 @@ module mastermind_datapath(
             end
 
             if (erase_code) begin
-                //x_out <= 7'd10 + erase_x[6:0];
-                //y_out <= 7'd50 + erase_y[6:0];
-                x_out <= 7'd0 + erase_x[6:0];
-                y_out <= 7'd0 + erase_y[6:0];
+                x_out <= 7'd10 + erase_x[6:0];
+                y_out <= 7'd50 + erase_y[6:0];
+                //x_out <= 7'd0 + erase_x[6:0];
+                //y_out <= 7'd0 + erase_y[6:0];
                 colour_out <= 3'b000;
             end
 
@@ -772,8 +772,8 @@ module slow_clock(reset_n, clock, slow_clock, q);
 		end
 		else
 		begin
-			//if (q == (20'b11110100001001000000 - 1))
-			if (q == 27'd3)
+			if (q == (20'b11110100001001000000 - 1))
+			//if (q == 27'd3)
 				begin
 				q <= 0;
 				slow_clock <= 1'b1;
@@ -885,9 +885,9 @@ module erase_code_squares(
             else
                 Q <= Q + 1'b1;
         end
-    end
+    end */
 
-endmodule */
+endmodule 
 
 
 module small_squares(
@@ -896,14 +896,18 @@ module small_squares(
     input resetn,
     input [2:0] peg_count,
     output reg [6:0] x,
-    output [6:0] y
+    output reg [6:0] y
 );
     reg [6:0] Q;
     
     always @(*) begin
         if (!resetn)
+		  begin
             x <= 0;
+				y <= 0;
+		  end
         else begin
+		      y <= Q / 7'd22; // floor division by 22
             case (peg_count)
                 3'd0: begin
                     x <= 7'b0;
@@ -954,7 +958,7 @@ module small_squares(
         end
     end
 
-    assign y = Q / 7'd22; // floor division by 22
+
 
     always @(posedge clock)
     begin
