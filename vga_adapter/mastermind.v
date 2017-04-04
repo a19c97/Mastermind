@@ -15,7 +15,7 @@ module mastermind(
     output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
     
     // VGA outputs
-    output			VGA_CLK;   				//	VGA Clock
+    	output			VGA_CLK;   				//	VGA Clock
 	output			VGA_HS;					//	VGA H_SYNC
 	output			VGA_VS;					//	VGA V_SYNC
 	output			VGA_BLANK_N;				//	VGA BLANK
@@ -67,14 +67,13 @@ module mastermind(
 	defparam VGA.BACKGROUND_IMAGE = "black.mif";
     
     mastermind_control ctrl(
-    	//.clk(CLOCK_50),
-		.clk(slow_clock),
+	.clk(slow_clock),
     	.resetn(resetn),
     	.load(load),	
     	.compare(compare),
-		.compare_i(compare_i),
-		.reach_result_5(reach_result_5),
-		.reset_red_white(reset_red_white),
+	.compare_i(compare_i),
+	.reach_result_5(reach_result_5),
+	.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -83,14 +82,13 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-		.erase_code(erase_code),
+	.erase_code(erase_code),
         .draw_result_1(draw_result_1),
         .draw_result_2(draw_result_2)
     );
     
     mastermind_datapath data(
-    	//.clk(CLOCK_50),
-		.clk(slow_clock),
+    	.clk(slow_clock),
         .fast_clk(CLOCK_50),
     	.resetn(resetn),
     	.data_in(SW[2:0]),
@@ -107,16 +105,16 @@ module mastermind(
         .draw_result_1(draw_result_1),
         .draw_result_2(draw_result_2),
 
-		.compare_i(compare_i),
-		.compare(compare),
-		.reach_result_5(reach_result_5),
-		.reset_red_white(reset_red_white),
+	.compare_i(compare_i),
+	.compare(compare),
+	.reach_result_5(reach_result_5),
+	.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-		.guess_counter(guess_counter),
-		.curr_code(curr_code),
+	.guess_counter(guess_counter),
+	.curr_code(curr_code),
 
         .x_out(x_out),
         .y_out(y_out),
@@ -126,9 +124,9 @@ module mastermind(
     
     slow_clock sc(
     	.clock(CLOCK_50),
-		.reset_n(reset_clock),
-		.slow_clock(slow_clock),
-		.q(q)
+	.reset_n(reset_clock),
+	.slow_clock(slow_clock),
+	.q(q)
     );
     
     hex_decoder H0(
@@ -172,8 +170,8 @@ module mastermind_control(
 	output reg compare, 
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
-    output reg erase_code,
-    output reg draw_result_1, draw_result_2,
+    	output reg erase_code,
+    	output reg draw_result_1, draw_result_2,
 	output reg [1:0] compare_i,
 	output reg reach_result_5, reset_red_white
 );
@@ -200,13 +198,13 @@ module mastermind_control(
         RESULT_0 = 8'd16,
         RESULT_1 = 8'd17,
         RESULT_2 = 8'd18,
-		RESULT_3 = 8'd19,
-		RESULT_4 = 8'd20,
+	    RESULT_3 = 8'd19,
+	    RESULT_4 = 8'd20,
         RESULT_5 = 8'd21,
-		ERASE_CODE = 8'd22,
-		ERASE_CODE_WAIT = 8'd23;
+	    ERASE_CODE = 8'd22,
+	    ERASE_CODE_WAIT = 8'd23;
         
-	always@(*)
+    always@(*)
     begin: state_table 
         case (current_state)
         	LOAD_CODE_1: next_state = load ? LOAD_CODE_1_WAIT : LOAD_CODE_1;
@@ -217,8 +215,8 @@ module mastermind_control(
         	LOAD_CODE_3_WAIT: next_state = load ? LOAD_CODE_3_WAIT : LOAD_CODE_4;
         	LOAD_CODE_4: next_state = load ? LOAD_CODE_4_WAIT : LOAD_CODE_4;
         	LOAD_CODE_4_WAIT: next_state = load ? LOAD_CODE_4_WAIT : ERASE_CODE;
-			ERASE_CODE: next_state = load ? ERASE_CODE_WAIT: ERASE_CODE;
-			ERASE_CODE_WAIT: next_state = load ? ERASE_CODE_WAIT : GUESS_1;
+		    ERASE_CODE: next_state = load ? ERASE_CODE_WAIT: ERASE_CODE;
+		    ERASE_CODE_WAIT: next_state = load ? ERASE_CODE_WAIT : GUESS_1;
         	GUESS_1: next_state = load ? GUESS_1_WAIT : GUESS_1;
         	GUESS_1_WAIT: next_state = load ? GUESS_1_WAIT : GUESS_2;
         	GUESS_2: next_state = load ? GUESS_2_WAIT : GUESS_2;
@@ -227,13 +225,13 @@ module mastermind_control(
         	GUESS_3_WAIT: next_state = load ? GUESS_3_WAIT : GUESS_4;
         	GUESS_4: next_state = load ? GUESS_4_WAIT : GUESS_4;
         	GUESS_4_WAIT: next_state = load ? GUESS_4_WAIT : RESULT_0;
-			RESULT_0: next_state = RESULT_1;
-			RESULT_1: next_state = RESULT_2;
-			RESULT_2: next_state = RESULT_3;
-			RESULT_3: next_state = RESULT_4;
-			RESULT_4: next_state = RESULT_5;
+		    RESULT_0: next_state = RESULT_1;
+		    RESULT_1: next_state = RESULT_2;
+		    RESULT_2: next_state = RESULT_3;
+		    RESULT_3: next_state = RESULT_4;	
+		    RESULT_4: next_state = RESULT_5;
             RESULT_5: next_state = GUESS_1;
-			default: next_state = LOAD_CODE_1;
+		    default: next_state = LOAD_CODE_1;
     	endcase
     end
     
@@ -245,10 +243,10 @@ module mastermind_control(
     	load_code_3 = 1'b0;
     	load_code_4 = 1'b0;
 
-		load_guess_1 = 1'b0;
-		load_guess_2 = 1'b0;
-		load_guess_3 = 1'b0;
-		load_guess_4 = 1'b0;
+	    load_guess_1 = 1'b0;
+	    load_guess_2 = 1'b0;
+	    load_guess_3 = 1'b0;
+	    load_guess_4 = 1'b0;
 
         erase_code = 1'b0;
 
@@ -382,22 +380,6 @@ module mastermind_datapath(
 				guess[11:9] <= data_in;
 			end
         end
-		  
-	  // determine win or loss
-	  //if (guess_counter == 3) begin
-			//if (red != 3'b100) begin
-			// Game over! 
-			//red_out <= 3'b000;
-			//white_out <= 3'b000;
-			//end
-		//end
-
-		//if (red == 3'b100) begin
-			// Win! 
-		//	red_out <= 3'd8;
-		//	white_out <= 3'd8;
-		//end
-        
     end
     
     // Drawing modules
@@ -486,6 +468,18 @@ module mastermind_datapath(
                 x_out <= 7'd10 + medium_x;
                 y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
                 colour_out <= data_in;
+                
+                // win condition
+                if (red_out == 3'd4) begin
+                    colour_out <= 0;
+                    // reset everything
+                end 
+                // loss condition
+                if (guess_counter == 3'd7) begin
+                    if (red_out != 3'd4) begin
+                        // reset everything
+                    end
+                end
             end
             if (load_guess_2) begin
                 x_out <= 7'd30 + medium_x;
