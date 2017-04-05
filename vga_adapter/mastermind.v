@@ -89,9 +89,6 @@ module mastermind(
 		.erase_code(erase_code),
         .draw_result_1(draw_result_1),
         .draw_result_2(draw_result_2),
-        .one_score(one_score),
-        .two_score(two_score),
-		.one_sets_code(one_sets_code)
     );
     
     mastermind_datapath data(
@@ -331,7 +328,7 @@ module mastermind_datapath(
 	input clk,
     input fast_clk,
 	input resetn,
-	input reset_n,
+	input reset_soft,
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
@@ -571,7 +568,7 @@ module mastermind_datapath(
 	
     // Curr code always block
 	always @(*) begin
-		if (!resetn) begin
+		if (!resetn || !reset_soft) begin
 			curr_code <= 3'd0;
 		end
 		// assign curr code			
@@ -595,7 +592,7 @@ module mastermind_datapath(
 
 	// Guess_counter
 	always @(posedge clk) begin
-		if (!resetn) begin
+		if (!resetn || !reset_soft) begin
 			guess_counter <= 3'd0;
 		end
 		if (reach_result_5) begin
