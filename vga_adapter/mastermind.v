@@ -400,7 +400,6 @@ module mastermind_datapath(
     wire [14:0] erase_screen_x, erase_screen_y;
     
     wire erase_screen;
-    assign erase_screen = (load_code_1 && guess_counter == 3'b111) ? 1 : 0;
     
     big_square bs_counter(
     	.enable(load_code_1 || load_code_2 || load_code_3 || load_code_4),
@@ -459,11 +458,13 @@ module mastermind_datapath(
             y_out <= 0;
             draw_out <= 0;
             colour_out <= 0;
+            erase_screen <= 1'b1;
         end
         else begin
             draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2) ? 1'b1 : 1'b0;
 
             if (load_code_1) begin
+                erase_screen <= 0;
             	if (guess_counter != 3'b111) begin
 		            x_out <= 7'd10 + big_x[6:0];
 		            y_out <= 7'd50 + big_y[6:0];
@@ -497,12 +498,12 @@ module mastermind_datapath(
                 
                 // win condition
                 if (red_out == 3'd4) begin
-                    // erase screen
+                    erase_screen <= 1'b1;
                 end 
                 // loss condition
                 if (guess_counter == 3'd7) begin
                     if (red_out != 3'd4) begin
-                        // erase screen
+                        erase_screen <= 1'b1;
                     end
                 end
             end
