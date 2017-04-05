@@ -282,6 +282,7 @@ module mastermind_control(
 		    end
     		GUESS_1: begin
     			load_guess_1 = 1'b1;
+				reset_red_white = 1'b1; 
     		end
     		GUESS_2: begin
     			load_guess_2 = 1'b1;
@@ -291,7 +292,7 @@ module mastermind_control(
     		end
     		GUESS_4: begin
     			load_guess_4 = 1'b1;
-			    reset_red_white = 1'b1;
+			   //reset_red_white = 1'b1; 
     		end
     		RESULT_0: begin
 			    compare = 1'b1;
@@ -488,13 +489,8 @@ module mastermind_datapath(
                 colour_out <= data_in;
             end
             if (load_guess_1) begin
-                x_out <= 7'd10 + medium_x;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
-                colour_out <= data_in;
-            end
-            if (load_guess_2) begin
-            	if (!erase_screen) begin
-                	x_out <= 7'd30 + medium_x;
+				    if (!erase_screen) begin
+                	x_out <= 7'd10 + medium_x;
                 	y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
                 	colour_out <= data_in;
                 end
@@ -502,7 +498,12 @@ module mastermind_datapath(
                 	x_out <= erase_screen_x[6:0];
                 	y_out <= erase_screen_y[6:0];
                 	colour_out <= 3'b000;
-                end
+                end  
+            end
+            if (load_guess_2) begin
+            	 x_out <= 7'd30 + medium_x;
+                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                colour_out <= data_in;
             end
             if (load_guess_3) begin
                 x_out <= 7'd50 + medium_x;
@@ -586,11 +587,9 @@ module mastermind_datapath(
 			guess_counter <= 3'd0;
 			one_score <= 3'd0;
 			two_score <= 3'd0;
-			one_sets_score <= 1'b1;
 		end
 		else if (!reset_soft) begin
 			guess_counter <= 3'd0;
-			one_sets_score <= !one_sets_score;
 		end
 		else if (reach_result_5) begin
             if (guess_counter == 3'd7)
@@ -605,6 +604,13 @@ module mastermind_datapath(
 		end
 	end
 	
+	// flip players
+	always @(negedge reset_soft) begin
+		if (!resetn) begin
+			one_sets_score <= 1'b1;
+		end
+		one_sets_score <= !one_sets_score;
+	end
 
 	compare c(
 		.clock(clk),
