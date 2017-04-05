@@ -1,5 +1,5 @@
 module mastermind(
-	SW, KEY, CLOCK_50, HEX5, HEX4, HEX3, HEX2, HEX1, HEX0,
+	SW, KEY, CLOCK_50, HEX5, HEX4, HEX1, HEX0, LEDR
 	VGA_CLK,   						//	VGA Clock
 	VGA_HS,							//	VGA H_SYNC
 	VGA_VS,							//	VGA V_SYNC
@@ -12,7 +12,8 @@ module mastermind(
     input [9:0] SW;
     input [3:0] KEY;
     input CLOCK_50;
-    output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
+    output [6:0] HEX5, HEX4, HEX1, HEX0;
+    output [9:0] LEDR;
     
     // VGA outputs
     output			VGA_CLK;   				//	VGA Clock
@@ -24,10 +25,11 @@ module mastermind(
 	output	[9:0]	VGA_G;	 				//	VGA Green[9:0]
 	output	[9:0]	VGA_B;   				//	VGA Blue[9:0]
     
-    wire load, resetn, reset_clock;
+    wire load, resetn, reset_clock, reset_soft;
     assign resetn = KEY[1];
     assign load = ~KEY[0];
     assign reset_clock = KEY[2];
+    assign reset_soft = KEY[3];
     
     wire [11:0] code, guess;
     wire [2:0] red_out, white_out;
@@ -41,6 +43,9 @@ module mastermind(
     wire [2:0] curr_code;
     wire slow_clock;
     wire [27:0] q;
+    
+    wire [3:0] one_score, two_score;
+    wire one_sets_score;
 
     wire [6:0] x_out, y_out;
     wire draw_out;
@@ -70,6 +75,7 @@ module mastermind(
     	//.clk(CLOCK_50),
 		.clk(slow_clock),
     	.resetn(resetn),
+    	.reset_soft(reset_soft),
     	.load(load),	
     	.compare(compare),
 		.compare_i(compare_i),
@@ -93,6 +99,7 @@ module mastermind(
 		.clk(slow_clock),
         .fast_clk(CLOCK_50),
     	.resetn(resetn),
+    	.reset_soft(reset_soft),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
@@ -117,6 +124,10 @@ module mastermind(
     	.white_out(white_out),
 		.guess_counter(guess_counter),
 		.curr_code(curr_code),
+		
+		.one_score(one_score),
+		.two_score(two_score),
+		.one_sets_score(one_sets_score),
 
         .x_out(x_out),
         .y_out(y_out),
@@ -132,23 +143,13 @@ module mastermind(
     );
     
     hex_decoder H0(
-        .hex_digit({1'b0, guess[2:0]}), 
+        .hex_digit(one_score), 
         .segments(HEX0)
     );
     
     hex_decoder H1(
-        .hex_digit({1'b0, guess[5:3]}), 
+        .hex_digit(two_score), 
         .segments(HEX1)
-    );
-    
-    hex_decoder H2(
-        .hex_digit({1'b0, guess[8:6]}), 
-        .segments(HEX2)
-    );
-    
-    hex_decoder H3(
-        .hex_digit({1'b0, guess[11:9]}), 
-        .segments(HEX3)
     );
     
     hex_decoder H4(
@@ -161,12 +162,15 @@ module mastermind(
         .segments(HEX5)
     );
     
+    assign LEDR[0] = one_sets_score;
+    
 endmodule
 
 
 module mastermind_control(
 	input clk,
 	input resetn,
+	input reset_soft,
 	input load,
 	
 	output reg compare, 
@@ -316,7 +320,7 @@ module mastermind_control(
     
     always@(posedge clk)
     begin: state_FFs
-        if (!resetn)
+        if (!resetn || !reset_soft)
             current_state <= LOAD_CODE_1;
         else
             current_state <= next_state;
@@ -329,6 +333,7 @@ module mastermind_datapath(
 	input clk,
     input fast_clk,
 	input resetn,
+	input reset_soft,
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
@@ -341,6 +346,10 @@ module mastermind_datapath(
 	output reg [2:0] red_out, white_out,
 	output reg [2:0] guess_counter,
 	output reg [2:0] curr_code,
+	
+	output reg [3:0] one_score,
+	output reg [3:0] two_score,
+	output reg one_sets_score,
 
     output reg [6:0] x_out,
     output reg [6:0] y_out,
@@ -352,7 +361,7 @@ module mastermind_datapath(
 	
 	// loading inputs
 	always @ (posedge clk) begin
-        if (!resetn) begin
+        if (!resetn || !reset_soft) begin
 			code <= 12'd0;
 			guess <= 12'd0;
         end
@@ -381,23 +390,7 @@ module mastermind_datapath(
 			if (load_guess_4) begin
 				guess[11:9] <= data_in;
 			end
-        end
-		  
-	  // determine win or loss
-	  //if (guess_counter == 3) begin
-			//if (red != 3'b100) begin
-			// Game over! 
-			//red_out <= 3'b000;
-			//white_out <= 3'b000;
-			//end
-		//end
-
-		//if (red == 3'b100) begin
-			// Win! 
-		//	red_out <= 3'd8;
-		//	white_out <= 3'd8;
-		//end
-        
+        end        
     end
     
     // Drawing modules
@@ -407,6 +400,10 @@ module mastermind_datapath(
     wire [11:0] erase_x, erase_y;
     wire [6:0] small_red_x, small_red_y;
     wire [6:0] small_white_x, small_white_y;
+    wire [13:0] erase_screen_x, erase_screen_y;
+    
+    wire erase_screen;
+    assign erase_screen = (load_guess_1 == 1'b1 && (guess_counter == 3'b111 || red_out == 3'b100)) ? 1 : 0;
     
     big_square bs_counter(
     	.enable(load_code_1 || load_code_2 || load_code_3 || load_code_4),
@@ -449,17 +446,25 @@ module mastermind_datapath(
         .x(small_white_x),
         .y(small_white_y)
     );
+    
+    erase_screen es_counter(
+		.enable(erase_screen),
+		.clock(fast_clk),
+		.resetn(resetn),
+		.x(erase_screen_x),
+		.y(erase_screen_y)
+	);
 
     // Drawing always block 
     always @(*) begin
-        if (!resetn) begin
+        if (!resetn || !reset_soft) begin
             x_out <= 0;
             y_out <= 0;
             draw_out <= 0;
             colour_out <= 0;
         end
         else begin
-            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2) ? 1'b1 : 1'b0;
+            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2 || erase_screen) ? 1'b1 : 1'b0;
 
 
             if (load_code_1) begin
@@ -488,9 +493,16 @@ module mastermind_datapath(
                 colour_out <= data_in;
             end
             if (load_guess_2) begin
-                x_out <= 7'd30 + medium_x;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
-                colour_out <= data_in;
+            	if (!erase_screen) begin
+                	x_out <= 7'd30 + medium_x;
+                	y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                	colour_out <= data_in;
+                end
+                else begin
+                	x_out <= erase_screen_x[6:0];
+                	y_out <= erase_screen_y[6:0];
+                	colour_out <= 3'b000;
+                end
             end
             if (load_guess_3) begin
                 x_out <= 7'd50 + medium_x;
@@ -506,8 +518,6 @@ module mastermind_datapath(
             if (erase_code) begin
                 x_out <= 7'd10 + erase_x[6:0];
                 y_out <= 7'd50 + erase_y[6:0];
-                //x_out <= 7'd0 + erase_x[6:0];
-                //y_out <= 7'd0 + erase_y[6:0];
                 colour_out <= 3'b000;
             end
 
@@ -536,7 +546,7 @@ module mastermind_datapath(
 	
     // Red and white always block
 	always @(*) begin
-		if (!resetn) begin
+		if (!resetn || !resetn_soft) begin
 			red_out <= 3'd0;
 			white_out <= 3'd0;
 		end
@@ -548,7 +558,7 @@ module mastermind_datapath(
 	
     // Curr code always block
 	always @(*) begin
-		if (!resetn) begin
+		if (!resetn || !reset_soft) begin
 			curr_code <= 3'd0;
 		end
 		// assign curr code			
@@ -574,12 +584,24 @@ module mastermind_datapath(
 	always @(posedge clk) begin
 		if (!resetn) begin
 			guess_counter <= 3'd0;
+			one_score <= 3'd0;
+			two_score <= 3'd0;
+			one_sets_score <= 1'b1;
 		end
-		if (reach_result_5) begin
+		else if (!reset_soft) begin
+			guess_counter <= 3'd0;
+			one_sets_score <= !one_sets_score;
+		end
+		else if (reach_result_5) begin
             if (guess_counter == 3'd7)
                 guess_counter <= 3'd0;
-            else
+            else begin
 			    guess_counter <= guess_counter + 1;
+			    if (one_sets_code)
+			    	one_score <= one_score + 1;
+			    else
+			    	two_score <= two_score + 1;
+			end
 		end
 	end
 	
@@ -868,24 +890,7 @@ module erase_code_squares(
             else
                 Q <= Q + 1'b1;
         end
-    end 
-	/*
-	// the erase everything version
-	reg [7:0] Q;
-	assign x = Q % 4'd10;
-	assign y = Q / 4'd10;
-	always @(posedge clock)
-    begin
-        if (!resetn)
-            Q <= 0;
-        else if (enable == 1'b1)
-        begin
-            if (Q == 8'd160)
-                Q <= 0;
-            else
-                Q <= Q + 1'b1;
-        end
-    end */
+    end
 
 endmodule 
 
@@ -958,8 +963,6 @@ module small_squares(
         end
     end
 
-
-
     always @(posedge clock)
     begin
         if (!resetn)
@@ -967,6 +970,34 @@ module small_squares(
         else if (enable == 1'b1)
         begin
             if (Q == 7'd87) // 87 in binary
+                Q <= 0;
+            else
+                Q <= Q + 1'b1;
+        end
+    end
+
+endmodule
+
+
+module erase_screen(
+    input enable,
+    input clock, // 50 MHz clock
+    input resetn,
+    output [13:0] x,
+    output [13:0] y
+);
+    reg [13:0] Q;
+    
+    assign x = Q % 14'd128; // modulo 128
+    assign y = Q / 14'd128; // floor division by 128
+
+    always @(posedge clock)
+    begin
+        if (!resetn)
+            Q <= 0;
+        else if (enable == 1'b1)
+        begin
+            if (Q == 14'd16383)
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
