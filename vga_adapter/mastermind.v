@@ -1,5 +1,5 @@
 module mastermind(
-	SW, KEY, CLOCK_50, HEX5, HEX4, HEX3, HEX2, HEX1, HEX0,
+	SW, KEY, CLOCK_50, HEX5, HEX4, HEX1, HEX0,
 	VGA_CLK,   						//	VGA Clock
 	VGA_HS,							//	VGA H_SYNC
 	VGA_VS,							//	VGA V_SYNC
@@ -12,10 +12,10 @@ module mastermind(
     input [9:0] SW;
     input [3:0] KEY;
     input CLOCK_50;
-    output [6:0] HEX5, HEX4, HEX3, HEX2, HEX1, HEX0;
+    output [6:0] HEX5, HEX4, HEX2, HEX1, HEX0;
     
     // VGA outputs
-    	output			VGA_CLK;   				//	VGA Clock
+    output			VGA_CLK;   				//	VGA Clock
 	output			VGA_HS;					//	VGA H_SYNC
 	output			VGA_VS;					//	VGA V_SYNC
 	output			VGA_BLANK_N;				//	VGA BLANK
@@ -24,10 +24,11 @@ module mastermind(
 	output	[9:0]	VGA_G;	 				//	VGA Green[9:0]
 	output	[9:0]	VGA_B;   				//	VGA Blue[9:0]
     
-    wire load, resetn, reset_clock;
+    wire load, resetn, reset_clock, soft_reset;
     assign resetn = KEY[1];
     assign load = ~KEY[0];
     assign reset_clock = KEY[2];
+    assign soft_reset = KEY[3];
     
     wire [11:0] code, guess;
     wire [2:0] red_out, white_out;
@@ -41,6 +42,8 @@ module mastermind(
     wire [2:0] curr_code;
     wire slow_clock;
     wire [27:0] q;
+    wire [3:0] one_score, two_score;
+    wire one_sets_code;
 
     wire [6:0] x_out, y_out;
     wire draw_out;
@@ -67,13 +70,14 @@ module mastermind(
 	defparam VGA.BACKGROUND_IMAGE = "black.mif";
     
     mastermind_control ctrl(
-	.clk(slow_clock),
+		.clk(slow_clock),
     	.resetn(resetn),
+        .reset_soft(reset_soft),
     	.load(load),	
     	.compare(compare),
-	.compare_i(compare_i),
-	.reach_result_5(reach_result_5),
-	.reset_red_white(reset_red_white),
+		.compare_i(compare_i),
+		.reach_result_5(reach_result_5),
+		.reset_red_white(reset_red_white),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
     	.load_code_3(load_code_3),
@@ -82,15 +86,19 @@ module mastermind(
     	.load_guess_2(load_guess_2),
     	.load_guess_3(load_guess_3),
     	.load_guess_4(load_guess_4),
-	.erase_code(erase_code),
+		.erase_code(erase_code),
         .draw_result_1(draw_result_1),
-        .draw_result_2(draw_result_2)
+        .draw_result_2(draw_result_2),
+        .one_score(one_score),
+        .two_score(two_score),
+		.one_sets_code(one_sets_code)
     );
     
     mastermind_datapath data(
     	.clk(slow_clock),
         .fast_clk(CLOCK_50),
     	.resetn(resetn),
+    	.reset_soft(reset_soft),
     	.data_in(SW[2:0]),
     	.load_code_1(load_code_1),
     	.load_code_2(load_code_2),
@@ -105,16 +113,16 @@ module mastermind(
         .draw_result_1(draw_result_1),
         .draw_result_2(draw_result_2),
 
-	.compare_i(compare_i),
-	.compare(compare),
-	.reach_result_5(reach_result_5),
-	.reset_red_white(reset_red_white),
+		.compare_i(compare_i),
+		.compare(compare),
+		.reach_result_5(reach_result_5),
+		.reset_red_white(reset_red_white),
     	.code(code),
     	.guess(guess),
     	.red_out(red_out),
     	.white_out(white_out),
-	.guess_counter(guess_counter),
-	.curr_code(curr_code),
+		.guess_counter(guess_counter),
+		.curr_code(curr_code),
 
         .x_out(x_out),
         .y_out(y_out),
@@ -124,29 +132,24 @@ module mastermind(
     
     slow_clock sc(
     	.clock(CLOCK_50),
-	.reset_n(reset_clock),
-	.slow_clock(slow_clock),
-	.q(q)
+		.reset_n(reset_clock),
+		.slow_clock(slow_clock),
+		.q(q)
     );
     
     hex_decoder H0(
-        .hex_digit({1'b0, guess[2:0]}), 
+        .hex_digit(one_score), 
         .segments(HEX0)
     );
     
     hex_decoder H1(
-        .hex_digit({1'b0, guess[5:3]}), 
+        .hex_digit(two_score), 
         .segments(HEX1)
     );
     
     hex_decoder H2(
-        .hex_digit({1'b0, guess[8:6]}), 
+        .hex_digit({3'b0, one_sets_code}), 
         .segments(HEX2)
-    );
-    
-    hex_decoder H3(
-        .hex_digit({1'b0, guess[11:9]}), 
-        .segments(HEX3)
     );
     
     hex_decoder H4(
@@ -166,12 +169,13 @@ module mastermind_control(
 	input clk,
 	input resetn,
 	input load,
+	input reset_soft,
 	
 	output reg compare, 
 	output reg load_code_1, load_code_2, load_code_3, load_code_4,
 	output reg load_guess_1, load_guess_2, load_guess_3, load_guess_4,
-    	output reg erase_code,
-    	output reg draw_result_1, draw_result_2,
+    output reg erase_code,
+	output reg draw_result_1, draw_result_2,
 	output reg [1:0] compare_i,
 	output reg reach_result_5, reset_red_white
 );
@@ -314,7 +318,7 @@ module mastermind_control(
     
     always@(posedge clk)
     begin: state_FFs
-        if (!resetn)
+        if (!resetn || !reset_soft)
             current_state <= LOAD_CODE_1;
         else
             current_state <= next_state;
@@ -327,6 +331,7 @@ module mastermind_datapath(
 	input clk,
     input fast_clk,
 	input resetn,
+	input reset_n,
 	input [2:0] data_in,
 	input load_code_1, load_code_2, load_code_3, load_code_4,
 	input load_guess_1, load_guess_2, load_guess_3, load_guess_4,
@@ -343,14 +348,17 @@ module mastermind_datapath(
     output reg [6:0] x_out,
     output reg [6:0] y_out,
     output reg draw_out,
-    output reg [2:0] colour_out
+    output reg [2:0] colour_out,
+    
+    output reg [3:0] one_score, two_score,
+    output reg one_sets_code
 );
 	
 	wire [2:0] red, white; // number of red and white pegs in feedback
 	
 	// loading inputs
 	always @ (posedge clk) begin
-        if (!resetn) begin
+        if (!resetn || !reset_soft) begin
 			code <= 12'd0;
 			guess <= 12'd0;
         end
@@ -434,7 +442,7 @@ module mastermind_datapath(
 
     // Drawing always block 
     always @(*) begin
-        if (!resetn) begin
+        if (!resetn || !reset_soft) begin
             x_out <= 0;
             y_out <= 0;
             draw_out <= 0;
@@ -472,12 +480,12 @@ module mastermind_datapath(
                 // win condition
                 if (red_out == 3'd4) begin
                     colour_out <= 0;
-                    // reset everything
+                    // erase screen
                 end 
                 // loss condition
                 if (guess_counter == 3'd7) begin
                     if (red_out != 3'd4) begin
-                        // reset everything
+                        // erase screen
                     end
                 end
             end
@@ -530,13 +538,27 @@ module mastermind_datapath(
 	
     // Red and white always block
 	always @(*) begin
+		if (!reset_soft) begin // reset_soft should leave scores unchanged
+			red_out <= 3'd0;
+			white_out <= 3'd0;
+			one_sets_code <= one_sets_code ? 1'b0 : 1'b1; // flip one_sets_code
+		end
 		if (!resetn) begin
 			red_out <= 3'd0;
 			white_out <= 3'd0;
+			one_score <= 4'd0;
+			two_score <= 4'd0;
+			one_sets_code <= 1'b1;
 		end
 		else begin 
 			red_out <= red;
 			white_out <= white;
+			if one_sets_code begin
+				one_score <= one_score + guess_counter;
+			end 
+			else begin
+				one_score <= one_score + guess_counter;
+			end
 		end
 	end
 	
