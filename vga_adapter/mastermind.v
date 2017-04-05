@@ -1,5 +1,5 @@
 module mastermind(
-	SW, KEY, CLOCK_50, HEX5, HEX4, HEX1, HEX0, LEDR
+	SW, KEY, CLOCK_50, HEX5, HEX4, HEX1, HEX0, LEDR,
 	VGA_CLK,   						//	VGA Clock
 	VGA_HS,							//	VGA H_SYNC
 	VGA_VS,							//	VGA V_SYNC
@@ -546,7 +546,7 @@ module mastermind_datapath(
 	
     // Red and white always block
 	always @(*) begin
-		if (!resetn || !resetn_soft) begin
+		if (!resetn || !reset_soft) begin
 			red_out <= 3'd0;
 			white_out <= 3'd0;
 		end
@@ -597,7 +597,7 @@ module mastermind_datapath(
                 guess_counter <= 3'd0;
             else begin
 			    guess_counter <= guess_counter + 1;
-			    if (one_sets_code)
+			    if (one_sets_score)
 			    	one_score <= one_score + 1;
 			    else
 			    	two_score <= two_score + 1;
