@@ -400,6 +400,7 @@ module mastermind_datapath(
     wire [14:0] erase_screen_x, erase_screen_y;
     
     wire erase_screen;
+    assign erase_screen = (load_guess_1 == 1'b1 && (guess_counter == 3'b111 || red_out == 3'b100)) ? 1 : 0;
     
     big_square bs_counter(
     	.enable(load_code_1 || load_code_2 || load_code_3 || load_code_4),
@@ -458,23 +459,14 @@ module mastermind_datapath(
             y_out <= 0;
             draw_out <= 0;
             colour_out <= 0;
-            erase_screen <= 1'b1;
         end
         else begin
-            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2) ? 1'b1 : 1'b0;
+            draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2 || erase_screen) ? 1'b1 : 1'b0;
 
             if (load_code_1) begin
-                erase_screen <= 0;
-            	if (guess_counter != 3'b111) begin
-		            x_out <= 7'd10 + big_x[6:0];
-		            y_out <= 7'd50 + big_y[6:0];
-		            colour_out <= data_in;
-		        end
-		        else if (guess_counter == 3'b111) begin
-		        	x_out <= erase_screen_x[6:0];
-		        	y_out <= erase_screen_y[6:0];
-		        	colour_out <= 3'b000;
-		        end
+		        x_out <= 7'd10 + big_x[6:0];
+		        y_out <= 7'd50 + big_y[6:0];
+		        colour_out <= data_in;
             end
             if (load_code_2) begin
                 x_out <= 7'd40 + big_x[6:0];
@@ -492,20 +484,25 @@ module mastermind_datapath(
                 colour_out <= data_in;
             end
             if (load_guess_1) begin
-                x_out <= 7'd10 + medium_x;
-                y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
-                colour_out <= data_in;
+                if (!erase_screen) begin
+                    x_out <= 7'd10 + medium_x;
+                    y_out <= 7'd10 + (7'd15 * {4'b0, guess_counter}) + medium_y;
+                    colour_out <= data_in;
+                end
+                else begin
+                    x_out <= erase_screen_x[6:0];
+                    y_out <= erase_screen_y[6:0];
+                    colour_out <= 3'b000;
+                end
                 
                 // win condition
-                if (red_out == 3'd4) begin
-                    erase_screen <= 1'b1;
-                end 
+                //if (red_out == 3'd4) begin
+                //end 
                 // loss condition
-                if (guess_counter == 3'd7) begin
-                    if (red_out != 3'd4) begin
-                        erase_screen <= 1'b1;
-                    end
-                end
+                //if (guess_counter == 3'd7) begin
+                //    if (red_out != 3'd4) begin
+                //    end
+                //end
             end
             if (load_guess_2) begin
                 x_out <= 7'd30 + medium_x;
@@ -526,8 +523,6 @@ module mastermind_datapath(
             if (erase_code) begin
                 x_out <= 7'd10 + erase_x[6:0];
                 y_out <= 7'd50 + erase_y[6:0];
-                //x_out <= 7'd0 + erase_x[6:0];
-                //y_out <= 7'd0 + erase_y[6:0];
                 colour_out <= 3'b000;
             end
 
