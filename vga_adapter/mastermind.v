@@ -479,7 +479,6 @@ module mastermind_datapath(
                 
                 // win condition
                 if (red_out == 3'd4) begin
-                    colour_out <= 0;
                     // erase screen
                 end 
                 // loss condition
@@ -553,12 +552,6 @@ module mastermind_datapath(
 		else begin 
 			red_out <= red;
 			white_out <= white;
-			if one_sets_code begin
-				one_score <= one_score + guess_counter;
-			end 
-			else begin
-				one_score <= one_score + guess_counter;
-			end
 		end
 	end
 	
@@ -594,8 +587,15 @@ module mastermind_datapath(
 		if (reach_result_5) begin
             if (guess_counter == 3'd7)
                 guess_counter <= 3'd0;
-            else
+            else begin
 			    guess_counter <= guess_counter + 1;
+			    if one_sets_code begin
+				    one_score <= one_score + 1;
+			    end 
+			    else begin
+				    one_score <= one_score + 1;
+			    end
+			end
 		end
 	end
 	
