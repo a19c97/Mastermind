@@ -593,7 +593,7 @@ module mastermind_datapath(
 				    one_score <= one_score + 1;
 			    end 
 			    else begin
-				    one_score <= one_score + 1;
+				    two_score <= two_score + 1;
 			    end
 			end
 		end
