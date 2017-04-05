@@ -163,3 +163,31 @@ module small_squares(
 
 endmodule
 
+
+module erase_screen(
+    input enable,
+    input clock, // 50 MHz clock
+    input resetn,
+    output [14:0] x,
+    output [14:0] y
+);
+    reg [14:0] Q;
+    
+    assign x = Q % 15'd160; // modulo 160
+    assign y = Q / 15'd120; // floor division by 120
+
+    always @(posedge clock)
+    begin
+        if (!resetn)
+            Q <= 0;
+        else if (enable == 1'b1)
+        begin
+            if (Q == 15'd19199) // 19199 in binary
+                Q <= 0;
+            else
+                Q <= Q + 1'b1;
+        end
+    end
+
+endmodule
+

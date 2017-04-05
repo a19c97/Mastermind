@@ -397,6 +397,10 @@ module mastermind_datapath(
     wire [11:0] erase_x, erase_y;
     wire [6:0] small_red_x, small_red_y;
     wire [6:0] small_white_x, small_white_y;
+    wire [14:0] erase_screen_x, erase_screen_y;
+    
+    wire erase_screen;
+    assign erase_screen = (load_code_1 && guess_counter == 3'b111) ? 1 : 0;
     
     big_square bs_counter(
     	.enable(load_code_1 || load_code_2 || load_code_3 || load_code_4),
@@ -440,6 +444,14 @@ module mastermind_datapath(
         .y(small_white_y)
     );
 
+	erase_screen es_counter(
+		.enable(erase_screen),
+		.clock(fast_clk),
+		.resetn(resetn),
+		.x(erase_screen_x),
+		.y(erase_screen_y)
+	);
+
     // Drawing always block 
     always @(*) begin
         if (!resetn || !reset_soft) begin
@@ -451,11 +463,17 @@ module mastermind_datapath(
         else begin
             draw_out <= (load_code_1 || load_code_2 || load_code_3 || load_code_4 || load_guess_1 || load_guess_2 || load_guess_3 || load_guess_4 || erase_code || draw_result_1 || draw_result_2) ? 1'b1 : 1'b0;
 
-
             if (load_code_1) begin
-                x_out <= 7'd10 + big_x[6:0];
-                y_out <= 7'd50 + big_y[6:0];
-                colour_out <= data_in;
+            	if (guess_counter != 3'b111) begin
+		            x_out <= 7'd10 + big_x[6:0];
+		            y_out <= 7'd50 + big_y[6:0];
+		            colour_out <= data_in;
+		        end
+		        else if (guess_counter == 3'b111) begin
+		        	x_out <= erase_screen_x[6:0];
+		        	y_out <= erase_screen_y[6:0];
+		        	colour_out <= 3'b000;
+		        end
             end
             if (load_code_2) begin
                 x_out <= 7'd40 + big_x[6:0];
@@ -822,7 +840,7 @@ module big_square(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 9'd399) // 399 in binary
+            if (Q == 9'd399)
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
@@ -850,7 +868,7 @@ module medium_square(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 7'd99) // 99 in binary
+            if (Q == 7'd99)
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
@@ -879,29 +897,12 @@ module erase_code_squares(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 12'd2199) // 2199 in binary
+            if (Q == 12'd2199)
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
         end
     end 
-	/*
-	// the erase everything version
-	reg [7:0] Q;
-	assign x = Q % 4'd10;
-	assign y = Q / 4'd10;
-	always @(posedge clock)
-    begin
-        if (!resetn)
-            Q <= 0;
-        else if (enable == 1'b1)
-        begin
-            if (Q == 8'd160)
-                Q <= 0;
-            else
-                Q <= Q + 1'b1;
-        end
-    end */
 
 endmodule 
 
@@ -923,7 +924,7 @@ module small_squares(
 				y <= 0;
 		  end
         else begin
-		      y <= Q / 7'd22; // floor division by 22
+		      y <= Q / 7'd22;
             case (peg_count)
                 3'd0: begin
                     x <= 7'b0;
@@ -982,7 +983,35 @@ module small_squares(
             Q <= 0;
         else if (enable == 1'b1)
         begin
-            if (Q == 7'd87) // 87 in binary
+            if (Q == 7'd87)
+                Q <= 0;
+            else
+                Q <= Q + 1'b1;
+        end
+    end
+
+endmodule
+
+
+module erase_screen(
+    input enable,
+    input clock, // 50 MHz clock
+    input resetn,
+    output [13:0] x,
+    output [13:0] y
+);
+    reg [13:0] Q;
+    
+    assign x = Q % 14'd128; // modulo 128
+    assign y = Q / 14'd128; // floor division by 128
+
+    always @(posedge clock)
+    begin
+        if (!resetn)
+            Q <= 0;
+        else if (enable == 1'b1)
+        begin
+            if (Q == 14'd16383)
                 Q <= 0;
             else
                 Q <= Q + 1'b1;
